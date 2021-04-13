@@ -15,13 +15,34 @@ npm install --save yomtor
 ```tsx
 import React, { Component } from 'react'
 
-import MyComponent from 'yomtor'
-import 'yomtor/dist/index.css'
+import {
+    AligmentProperties,
+    Canvas,
+    Properties,
+    RectProperties,
+    Yomtor,
+    Zoom,
+    Color,
+    YomtorRectangle,
+    FabricContext
+} from 'yomtor'
 
 class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
+  render() (
+      <Yomtor settings={settings}>
+        <Properties>
+            <AligmentProperties></AligmentProperties>
+            <RectProperties></RectProperties>
+        </Properties>
+
+        <Toolbar>
+            <ButtonTest></ButtonTest>
+        </Toolbar>
+        <Canvas>
+            <Zoom></Zoom>
+        </Canvas>
+      </Yomtor>
+  )
 }
 ```
 
