@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useRef, useCallback } from 'react'
+import React, { useContext, useEffect, useRef } from 'react'
 import { createUseStyles } from 'react-jss'
-import { FabricContext } from '../Yomtor'
-import { useEventListener } from '../../hooks/event-listener'
-import { fabric } from 'fabric'
+import { CanvasContext } from '../Yomtor'
+import paper from 'paper'
+import Selector from '../tools/Selector'
 
-const useStyles = createUseStyles({
+type Classes = 'root' | 'tools' | 'canvas'
+
+const useStyles = createUseStyles<Classes>({
     root: {
         height: '100%',
         width: '100%'
@@ -13,59 +15,35 @@ const useStyles = createUseStyles({
         position: 'absolute',
         bottom: 0,
         right: 0
+    },
+    canvas: {
+        background: 'white',
+        width: '100%',
+        height: '100%'
     }
 })
 
 const Canvas: React.FC = ({ children }) => {
     const styles = useStyles()
     const wrapperRef = useRef<HTMLDivElement>(null)
-    const [canvas, initCanvas] = useContext(FabricContext)
-
-    const resizeHandle = useCallback(() => {
-        const wrapper = wrapperRef.current
-
-        if (!canvas || !wrapper) return
-
-        canvas.setHeight(wrapper.clientHeight)
-        canvas.setWidth(wrapper.clientWidth)
-        canvas.setBackgroundColor('white', () => {})
-        canvas.renderAll()
-    }, [canvas])
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const [canvas, initCanvas] = useContext(CanvasContext)
 
     useEffect(() => {
-        initCanvas(
-            new fabric.Canvas('yomtor-canvas', { uniformScaling: false })
-        )
+        const scope = new paper.PaperScope()
+
+        scope.setup(canvasRef.current)
+        initCanvas(scope)
     }, [])
-
-    useEffect(() => {
-        if (!canvas) return
-
-        resizeHandle()
-
-        canvas.on('object:scaling', function () {
-            var obj = canvas.getActiveObject()
-
-            var obj = canvas.getActiveObject(),
-                width = obj.width || 0,
-                height = obj.height || 0,
-                scaleX = obj.scaleX || 1,
-                scaleY = obj.scaleY || 1
-
-            obj.set({
-                width: width * scaleX,
-                height: height * scaleY,
-                scaleX: 1,
-                scaleY: 1
-            })
-        })
-    }, [canvas])
-
-    useEventListener('resize', resizeHandle)
 
     return (
         <div className={styles.root} ref={wrapperRef}>
-            <canvas id='yomtor-canvas'></canvas>
+            <canvas
+                ref={canvasRef}
+                className={styles.canvas}
+                data-paper-resize='true'
+            />
+            <Selector />
             <div className={styles.tools}>{children}</div>
         </div>
     )

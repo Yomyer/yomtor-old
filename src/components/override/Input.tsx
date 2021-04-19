@@ -11,7 +11,8 @@ const useStyles = createUseStyles({
         border: 'none',
         width: '100%',
         outline: 'none',
-        background: 'none'
+        background: 'none',
+        color: 'inherit'
     }
 })
 

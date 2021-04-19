@@ -68,6 +68,7 @@
     "fabric": "^4.4.0",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.22",
+    "paper": "^0.12.15",
     "react-draggable": "^4.4.3",
     "react-ink": "^6.4.0",
     "react-jss": "^10.6.0",

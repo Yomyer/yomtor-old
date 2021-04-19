@@ -12,10 +12,11 @@ const useStyles = createUseStyles({
         placeContent: 'center space-between',
         alignItems: 'center',
         flexDirection: 'row',
-        padding: 10,
+        padding: '0 10px',
+        margin: '10px 0',
         '& > *': {
             width: '100%',
-            marginRight: '5px'
+            marginRight: '10px'
         },
         '& > *:last-child': {
             marginRight: '0'

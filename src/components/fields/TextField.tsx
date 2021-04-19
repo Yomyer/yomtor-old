@@ -15,7 +15,7 @@ const TextField: React.FC<Props> = ({ multiple, ...props }) => {
                         placeholder: multiple ? 'Multiple' : ''
                     }
                 }}
-            ></Input>
+            />
         </Field>
     )
 }

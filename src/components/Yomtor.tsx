@@ -6,6 +6,8 @@ import { store } from '../redux'
 import { Settings } from '../redux/settings/settings.model'
 import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
+import { createTheme } from '../styles'
+import paper from 'paper'
 
 type Props = {
     settings?: Settings
@@ -13,9 +15,12 @@ type Props = {
     overrideSettings?: boolean
 }
 
-type FabContext = [fabric.Canvas | null, (c: fabric.Canvas) => void]
+type CanvasContextProp = [
+    paper.PaperScope | null,
+    (c: paper.PaperScope) => void
+]
 
-export const FabricContext = createContext<FabContext>([null, () => {}])
+export const CanvasContext = createContext<CanvasContextProp>([null, () => {}])
 
 const Yomtor: React.FC<Props> = ({
     children,
@@ -23,9 +28,9 @@ const Yomtor: React.FC<Props> = ({
     theme,
     overrideSettings
 }) => {
-    const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
+    const [canvas, setCanvas] = useState<paper.PaperScope | null>(null)
 
-    const initCanvas = (c: fabric.Canvas): void => {
+    const initCanvas = (c: paper.PaperScope): void => {
         setCanvas(c)
     }
 
@@ -37,18 +42,16 @@ const Yomtor: React.FC<Props> = ({
             )}
         >
             <ThemeProvider theme={theme || {}}>
-                <FabricContext.Provider value={[canvas, initCanvas]}>
+                <CanvasContext.Provider value={[canvas, initCanvas]}>
                     {children}
-                </FabricContext.Provider>
+                </CanvasContext.Provider>
             </ThemeProvider>
         </Provider>
     )
 }
 
 Yomtor.defaultProps = {
-    theme: {
-        colorPrimary: 'red'
-    }
+    theme: createTheme()
 }
 
 export default Yomtor

@@ -7,11 +7,11 @@ const AligmentProperties: React.FC = () => {
     return (
         <Block>
             <TextField
-                multiple={true}
+                multiple
                 label='label'
                 labelPosition='below'
                 onChange={(event) => console.log(event?.currentTarget.value)}
-            ></TextField>
+            />
             <ButtonField
                 label='label'
                 onChange={(event) => console.log(event?.currentTarget)}

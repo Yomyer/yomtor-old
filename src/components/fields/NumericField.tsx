@@ -8,6 +8,7 @@ import { clearGlobalCursor, setGlobalCursor } from '../../utils/setCursor'
 import Ink from 'react-ink'
 import useLongPress from '../../uses/useLongPress'
 import { clearProps } from '../../utils'
+import { YomtorTheme } from '../../styles/createTheme'
 
 type Props = {
     prefix?: string
@@ -19,18 +20,20 @@ type Props = {
     min?: number
 } & FieldProps<HTMLInputElement>
 
-type Names = 'root' | 'prefix' | 'suffix' | 'arrows'
+type Classes = 'root' | 'prefix' | 'suffix' | 'arrows'
 
 const useStyles = createUseStyles<
-    Names,
+    Classes,
     Props & { showArrows: boolean; focused: boolean },
-    any
->(() => ({
+    YomtorTheme
+>((theme) => ({
     root: {
-        background: 'white',
-        border: '1px solid rgba(0,0,0,.12)',
-        borderRadius: 3,
-        color: 'rgba(0, 0, 0, 0.87)',
+        background: theme.palette.background.default,
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: theme.palette.divider,
+        borderRadius: theme.shape.borderRadius,
+        color: theme.palette.text.primary,
         position: 'relative',
         display: 'flex',
         flexDirection: 'row',
@@ -38,7 +41,7 @@ const useStyles = createUseStyles<
         placeContent: 'stretch space-between',
         alignItems: 'stretch',
         padding: '0 5px',
-        fontSize: 10,
+        fontSize: theme.typography.input.fontSize,
         minHeight: 22
     },
     prefix: {
@@ -46,14 +49,16 @@ const useStyles = createUseStyles<
         placeContent: 'center center',
         alignItems: 'center',
         cursor: 'ew-resize',
-        transform: 'none !important'
+        transform: 'none !important',
+        opacity: (props) => (!props.focused && props.showArrows ? 0 : 0.5)
     },
     suffix: {
         display: 'flex',
         placeContent: 'center center',
         alignItems: 'center',
         cursor: 'ew-resize',
-        transform: 'none !important'
+        transform: 'none !important',
+        opacity: (props) => (!props.focused && props.showArrows ? 0 : 0.5)
     },
 
     arrows: {
@@ -67,8 +72,8 @@ const useStyles = createUseStyles<
         justifyContent: 'space-between',
         alignContent: 'stretch',
         alignItems: 'stretch',
-        background: 'white',
-        borderLeft: '1px solid rgba(0,0,0,.12)',
+        background: theme.palette.background,
+        borderLeft: `1px solid ${theme.palette.divider}`,
         fontSize: 7,
         cursor: 'pointer',
         opacity: (props) => (!props.focused && props.showArrows ? 1 : 0),
@@ -85,15 +90,11 @@ const useStyles = createUseStyles<
             position: 'relative'
         }
     }
-    /* showArrows: {
-        opacity: 1,
-        pointerEvents: 'all',
-    } */
 }))
 
-const isValid = ({ zero, integrer }: Props, value: any) => {
-    let pattern = '^-?'
-    // pattern += !abs ? '-?' : '';
+const isValid = ({ zero, abs, integrer }: Props, value: any) => {
+    let pattern = '^'
+    pattern += !abs ? '-?' : ''
     pattern += zero ? '\\d*' : '[1-9]\\d*'
     pattern += !integrer ? '([.|,]?\\d+)?' : ''
     pattern += '$'
@@ -117,14 +118,15 @@ const NumericField: React.FC<Props> = ({
     const [defaultValue, setDefatulValue] = useState('0')
     const [showArrows, setShowArrows] = useState(false)
     const [focused, setFocused] = useState(false)
-    const theme = useTheme()
+    const theme = useTheme<YomtorTheme>()
+    const validatorProps = { zero, abs, integrer }
 
     const input = useRef<HTMLInputElement>()
     const styles = useStyles({ theme, ...{ showArrows, focused } })
 
     const update = (e: any, offset = 0) => {
         if (!onUpdate) return
-        if (!isValid(props, e.target.value)) {
+        if (!isValid(validatorProps, e.target.value)) {
             e.target.value = defaultValue
         }
 
@@ -143,9 +145,18 @@ const NumericField: React.FC<Props> = ({
             value = 0
         }
 
+        if (max && value > +max) {
+            value = +max
+        }
+
+        if (min && value < +min) {
+            value = +min
+        }
+
         e.target.value = Number(value)
 
         onUpdate(e)
+        setDefatulValue(e.target.value)
     }
 
     props.onBlur = (e: any) => {
@@ -159,7 +170,7 @@ const NumericField: React.FC<Props> = ({
     }
 
     props.onInput = (e: any) => {
-        if (isValid(props, e.target.value)) {
+        if (isValid(validatorProps, e.target.value)) {
             setDefatulValue(e.target.value)
         }
     }
@@ -252,6 +263,10 @@ const NumericField: React.FC<Props> = ({
             </div>
         </Field>
     )
+}
+
+NumericField.defaultProps = {
+    zero: true
 }
 
 export default NumericField
