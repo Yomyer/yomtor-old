@@ -1,5 +1,5 @@
 import createPalette, { Palette } from './createPalete'
-import { mergeObjects } from '../apis/lodash'
+import { mergeObjects } from '../utils/lodashUtils'
 import createBreakpoints, { BreakpointsOptions } from './createBreakpoints'
 import shadows from './shadows'
 import shape, { ShapeOptions } from './shape'

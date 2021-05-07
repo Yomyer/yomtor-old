@@ -37,11 +37,6 @@ export function rgbToHex(color: string): string {
     return `#${values.map((n: number) => intToHex(n)).join('')}`
 }
 
-/**
- * Converts a color from hsl format to rgb format.
- * @param {string} color - HSL color values
- * @returns {string} rgb color values
- */
 export function hslToRgb(color: any): string {
     color = decomposeColor(color)
     const { values } = color

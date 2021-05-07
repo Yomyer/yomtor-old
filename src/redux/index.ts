@@ -2,7 +2,7 @@ import { createStore, combineReducers, applyMiddleware } from 'redux'
 import { Settings, SettingsReducer, SettingsInitialState } from './settings'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly'
-import { mergeObjects } from '../apis/lodash'
+import { mergeObjects } from '../utils/lodashUtils'
 
 const middleware = [thunk]
 

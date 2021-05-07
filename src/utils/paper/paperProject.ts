@@ -3,20 +3,23 @@ import paper from 'paper'
 declare global {
     export namespace paper {
         export interface Project {
+            insertMode: boolean
             activedItems: paper.Item[]
             deactivateAll: () => void
-            guides: paper.Layer
+            guides: paper.Layer[]
             getItemByPoint: (
                 point: paper.Point,
                 options?: { [key: string]: any }
             ) => paper.Item
+            selectorItem: paper.Item
         }
     }
 }
 
 paper.Project.prototype.activedItems = []
 paper.Project.prototype.deactivateAll = function () {
-    this.activedItems.forEach((item) => (item.actived = false))
+    this.activedItems.slice().forEach((item) => (item.actived = false))
+    this.activedItems = []
 }
 
 paper.Project.prototype.getItemByPoint = function (
@@ -30,11 +33,12 @@ paper.Project.prototype.getItemByPoint = function (
         stroke: true,
         curves: true,
         fill: true,
-        guide: false,
+        guides: false,
         tolerance: 8 / this.view.zoom,
         match: (hit: paper.HitResult) => {
             return (
                 !hit.item.hasFill() &&
+                !hit.item.blocked &&
                 (options.filter ? options.filter(hit.item) : true)
             )
         }
@@ -46,7 +50,8 @@ paper.Project.prototype.getItemByPoint = function (
             ...{
                 tolerance: 0,
                 match: (hit: paper.HitResult) =>
-                    options.filter ? options.filter(hit.item) : true
+                    !hit.item.blocked &&
+                    (options.filter ? options.filter(hit.item) : true)
             },
             ...options
         })

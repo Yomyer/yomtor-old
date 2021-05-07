@@ -1,5 +1,5 @@
 import { Color } from '../models'
-import { mergeObjects } from './lodash'
+import { mergeObjects } from './lodashUtils'
 
 test('Merge multiple objects', () => {
     const a = new Color('#000')

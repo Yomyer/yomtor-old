@@ -4,11 +4,17 @@ import Input from '../override/Input'
 import Field, { FieldProps } from './Field'
 import { createUseStyles, useTheme } from 'react-jss'
 import Draggable from 'react-draggable'
-import { clearGlobalCursor, setGlobalCursor } from '../../utils/setCursor'
+import {
+    clearCursor,
+    clearGlobalCursor,
+    setCursor,
+    setGlobalCursor
+} from '../../utils/cursorUtils'
 import Ink from 'react-ink'
 import useLongPress from '../../uses/useLongPress'
 import { clearProps } from '../../utils'
 import { YomtorTheme } from '../../styles/createTheme'
+import { ResizeEW } from '../icons/cursor'
 
 type Props = {
     prefix?: string
@@ -18,6 +24,7 @@ type Props = {
     integrer?: boolean
     max?: number
     min?: number
+    mutipleText?: string
 } & FieldProps<HTMLInputElement>
 
 type Classes = 'root' | 'prefix' | 'suffix' | 'arrows'
@@ -48,7 +55,6 @@ const useStyles = createUseStyles<
         display: 'flex',
         placeContent: 'center center',
         alignItems: 'center',
-        cursor: 'ew-resize',
         transform: 'none !important',
         opacity: (props) => (!props.focused && props.showArrows ? 0 : 0.5)
     },
@@ -56,8 +62,8 @@ const useStyles = createUseStyles<
         display: 'flex',
         placeContent: 'center center',
         alignItems: 'center',
-        cursor: 'ew-resize',
         transform: 'none !important',
+        paddingLeft: 5,
         opacity: (props) => (!props.focused && props.showArrows ? 0 : 0.5)
     },
 
@@ -92,13 +98,12 @@ const useStyles = createUseStyles<
     }
 }))
 
-const isValid = ({ zero, abs, integrer }: Props, value: any) => {
+const isValid = ({ zero, abs, integrer, multiple }: Props, value: any) => {
     let pattern = '^'
-    pattern += !abs ? '-?' : ''
-    pattern += zero ? '\\d*' : '[1-9]\\d*'
+    pattern += !abs || !multiple ? '-?' : ''
+    pattern += zero && !multiple ? '\\d*' : '[1-9]\\d*'
     pattern += !integrer ? '([.|,]?\\d+)?' : ''
     pattern += '$'
-
     const regexp = new RegExp(pattern)
     return regexp.exec(value)
 }
@@ -112,6 +117,7 @@ const NumericField: React.FC<Props> = ({
     max,
     min,
     integrer,
+    mutipleText,
     onUpdate,
     ...props
 }) => {
@@ -124,8 +130,11 @@ const NumericField: React.FC<Props> = ({
     const input = useRef<HTMLInputElement>()
     const styles = useStyles({ theme, ...{ showArrows, focused } })
 
+    if (!mutipleText) mutipleText = 'Multiple'
+
     const update = (e: any, offset = 0) => {
         if (!onUpdate) return
+
         if (!isValid(validatorProps, e.target.value)) {
             e.target.value = defaultValue
         }
@@ -141,15 +150,15 @@ const NumericField: React.FC<Props> = ({
             (+e.target.value.replace(',', '.') + offset).toFixed(2)
         )
 
-        if (abs && value < 0) {
+        if (abs && value < 0 && !multiple) {
             value = 0
         }
 
-        if (max && value > +max) {
+        if (max && value > +max && !multiple) {
             value = +max
         }
 
-        if (min && value < +min) {
+        if (min && value < +min && !multiple) {
             value = +min
         }
 
@@ -190,18 +199,23 @@ const NumericField: React.FC<Props> = ({
 
     const onDrag = (e: any, ui: any) => {
         if (!ui.deltaX) return
-        e.target.value = props.value
+        e.target.value = multiple ? '0' : props.value
         e.target.name = props.name
 
         update(e, ui.deltaX)
     }
 
     const onDragStart = () => {
-        setGlobalCursor('ew-resize')
+        setGlobalCursor(ResizeEW)
     }
 
-    const onDragStop = () => {
+    const onDragStop = (e: any) => {
         clearGlobalCursor()
+
+        e.target.value = multiple ? '0' : props.value
+        e.target.name = props.name
+
+        onUpdate(e)
     }
 
     const handleIncrease = (e: any) => {
@@ -228,7 +242,13 @@ const NumericField: React.FC<Props> = ({
                         onStart={onDragStart}
                         onStop={onDragStop}
                     >
-                        <div className={styles.prefix}>{prefix}</div>
+                        <div
+                            className={styles.prefix}
+                            onMouseEnter={() => setCursor(ResizeEW)}
+                            onMouseLeave={clearCursor}
+                        >
+                            {prefix}
+                        </div>
                     </Draggable>
                 )}
                 <Input
@@ -236,7 +256,8 @@ const NumericField: React.FC<Props> = ({
                     {...{
                         ...clearProps(props),
                         ...{
-                            placeholder: multiple ? 'Multiple' : ''
+                            placeholder: multiple ? mutipleText : '',
+                            value: multiple ? '' : props.value
                         }
                     }}
                 />
@@ -247,7 +268,13 @@ const NumericField: React.FC<Props> = ({
                         onStart={onDragStart}
                         onStop={onDragStop}
                     >
-                        <div className={styles.suffix}>{suffix}</div>
+                        <div
+                            className={styles.suffix}
+                            onMouseEnter={() => setCursor(ResizeEW)}
+                            onMouseLeave={clearCursor}
+                        >
+                            {suffix}
+                        </div>
                     </Draggable>
                 )}
                 <div className={styles.arrows}>

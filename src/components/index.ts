@@ -1,6 +1,6 @@
 export * from './widgets'
 export * from './containers'
-export { default as Yomtor, CanvasContext } from './Yomtor'
+export { default as Yomtor, EditorContext } from './Yomtor'
 export * from './fields'
 export * from './icons'
-export * from './objects'
+export * from './tools'

@@ -6,6 +6,8 @@ declare global {
             name: string
             actived: boolean
             activateMain: () => void
+            onActivate: (tool: paper.Tool) => void
+            onDeactivate: (tool: paper.Tool) => void
             _scope: paper.PaperScope
         }
     }

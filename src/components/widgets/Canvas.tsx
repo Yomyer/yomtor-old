@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { createUseStyles } from 'react-jss'
-import { CanvasContext } from '../Yomtor'
+import { EditorContext } from '../Yomtor'
 import paper from 'paper'
-import Selector from '../tools/Selector'
 
+type Props = {
+    actions?: React.ReactNode
+}
 type Classes = 'root' | 'tools' | 'canvas'
 
 const useStyles = createUseStyles<Classes>({
@@ -23,11 +25,11 @@ const useStyles = createUseStyles<Classes>({
     }
 })
 
-const Canvas: React.FC = ({ children }) => {
+const Canvas: React.FC<Props> = ({ children }) => {
     const styles = useStyles()
     const wrapperRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [canvas, initCanvas] = useContext(CanvasContext)
+    const { canvas, initCanvas } = useContext(EditorContext)
 
     useEffect(() => {
         const scope = new paper.PaperScope()
@@ -43,7 +45,6 @@ const Canvas: React.FC = ({ children }) => {
                 className={styles.canvas}
                 data-paper-resize='true'
             />
-            <Selector />
             <div className={styles.tools}>{children}</div>
         </div>
     )

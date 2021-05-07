@@ -67,7 +67,7 @@ export default (callback: (e: any) => void) => {
 
     return {
         onMouseDown: (e: any) => setMouseEvent(e),
-        onMouseUp: () => setMouseEvent(null),
+        onMouseUp: (e: any) => setMouseEvent(e),
         onMouseLeave: () => setMouseEvent(null),
         onTouchStart: (e: any) => setMouseEvent(e),
         onTouchEnd: () => setMouseEvent(null)

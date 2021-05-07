@@ -6,7 +6,7 @@ import orange from './colors/orange'
 import blue from './colors/blue'
 import green from './colors/green'
 import { getContrastRatio, lighten, darken } from './colorManipulation'
-import { mergeObjects } from '../apis/lodash'
+import { mergeObjects } from '../utils/lodashUtils'
 import grey from './colors/grey'
 
 export type PaletteColor = {
@@ -43,6 +43,20 @@ export type TypeText = {
     icon?: string
 }
 
+export type TypeCanvas = {
+    info: {
+        color: string
+        background: string
+    }
+    selector: {
+        border: string
+    }
+    corners: {
+        background: string
+        border: string
+    }
+}
+
 export type Palette = {
     primary?: PaletteColor
     secondary?: PaletteColor
@@ -56,6 +70,7 @@ export type Palette = {
     text?: TypeText
     divider?: TypeDivider
     action?: TypeAction
+    canvas?: TypeCanvas
     background?: TypeBackground
 }
 
@@ -114,6 +129,20 @@ export const dark: Palette = {
         focus: 'rgba(255, 255, 255, 0.12)',
         focusOpacity: 0.12,
         activatedOpacity: 0.24
+    }
+}
+
+export const canvas: TypeCanvas = {
+    info: {
+        color: 'white',
+        background: 'rgba(128, 128, 128, 0.5)'
+    },
+    selector: {
+        border: ''
+    },
+    corners: {
+        background: '',
+        border: ''
     }
 }
 
@@ -221,6 +250,7 @@ export default function createPalette(palette: Palette): Palette {
             getContrastText,
             augmentColor,
             tonalOffset,
+            canvas,
             ...modes[mode]
         },
         other

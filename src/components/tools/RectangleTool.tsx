@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
-import { CanvasContext } from '../Yomtor'
+import { EditorContext } from '../Yomtor'
 import paper from 'paper'
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
 }
 
 const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
-    const [canvas] = useContext(CanvasContext)
+    const { canvas } = useContext(EditorContext)
     const [insertMode, setInserMode] = useState(false)
     const [tool, setTool] = useState<paper.Tool>()
     const phantom = useRef<paper.Path.Rectangle>(null)
@@ -20,7 +20,7 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
     useEffect(() => {
         if (!tool) return
 
-        onInserMode(insertMode)
+        onInserMode((canvas.project.insertMode = insertMode))
 
         if (insertMode) {
             tool.activate()
@@ -43,9 +43,16 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
                 guide: true,
                 parent: canvas.guides
             })
+
+            canvas.setInfo(
+                `${phantom.current.bounds.width} x ${phantom.current.bounds.height}`,
+                e.point
+            )
         }
 
         tool.onMouseUp = (e: paper.ToolEvent) => {
+            setInserMode(false)
+
             if (phantom.current) {
                 phantom.current.remove()
                 canvas.project.deactivateAll()
@@ -58,8 +65,11 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
                     name: 'Rectangle',
                     actived: true
                 })
+
+                canvas.fire('object:created', e)
             }
-            setInserMode(false)
+
+            canvas.clearInfo()
         }
 
         tool.onKeyDown = (e: paper.KeyEvent) => {

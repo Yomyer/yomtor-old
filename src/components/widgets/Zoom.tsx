@@ -1,9 +1,8 @@
-import React from "react";
+import React from 'react'
 // import { useSelector } from "react-redux";
 // import { State } from '../../redux';
 
 // import { useDispatch } from "react-redux";
-
 
 const Zoom: React.FC = () => {
     // const dispatch = useDispatch();
@@ -23,5 +22,4 @@ const Zoom: React.FC = () => {
     )
 }
 
-
-export default Zoom;
+export default Zoom

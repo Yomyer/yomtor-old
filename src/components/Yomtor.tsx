@@ -7,7 +7,7 @@ import { Settings } from '../redux/settings/settings.model'
 import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
 import { createTheme } from '../styles'
-import paper from 'paper'
+import { YomtorTheme } from '../styles/createTheme'
 
 type Props = {
     settings?: Settings
@@ -15,12 +15,18 @@ type Props = {
     overrideSettings?: boolean
 }
 
-type CanvasContextProp = [
-    paper.PaperScope | null,
-    (c: paper.PaperScope) => void
-]
-
-export const CanvasContext = createContext<CanvasContextProp>([null, () => {}])
+type EditorContextProps = {
+    canvas: paper.PaperScope | null
+    initCanvas: (c: paper.PaperScope) => void
+    settings: Settings
+    theme: YomtorTheme
+}
+export const EditorContext = createContext<EditorContextProps>({
+    canvas: null,
+    initCanvas: () => {},
+    settings: {},
+    theme: {}
+})
 
 const Yomtor: React.FC<Props> = ({
     children,
@@ -42,9 +48,11 @@ const Yomtor: React.FC<Props> = ({
             )}
         >
             <ThemeProvider theme={theme || {}}>
-                <CanvasContext.Provider value={[canvas, initCanvas]}>
+                <EditorContext.Provider
+                    value={{ canvas, initCanvas, settings, theme }}
+                >
                     {children}
-                </CanvasContext.Provider>
+                </EditorContext.Provider>
             </ThemeProvider>
         </Provider>
     )

@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react'
 import { Palette } from './createPalete'
-import { mergeObjects } from '../apis/lodash'
+import { mergeObjects } from '../utils/lodashUtils'
 
 export type Variant =
     | 'h1'
