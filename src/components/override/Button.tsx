@@ -9,7 +9,8 @@ type Props = React.DetailedHTMLProps<
 const useStyles = createUseStyles({
     root: {
         border: 'none',
-        width: '100%'
+        width: '100%',
+        outline: 'none'
     }
 })
 

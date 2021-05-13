@@ -12,12 +12,14 @@ import { EditorContext } from '../../Yomtor'
 
 const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
     ({ children }, ref) => {
-        const { canvas } = useContext(EditorContext)
+        const { canvas, theme } = useContext(EditorContext)
+        const [selector, setSelector] = useState<paper.Selector>(null)
+        const [, updateState] = useState<any>()
+
         const group = useRef<paper.Group>(null)
         const activedRects = useRef<paper.Item[]>([])
         const rect = useRef<paper.Path.Rectangle>(null)
         const actives = useRef<paper.Item[]>([])
-        const [selector, setSelector] = useState<paper.Selector>(null)
         const clone = useRef<paper.Group>(null)
 
         useEffect(() => {
@@ -27,8 +29,15 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                 guide: true
             })
 
+            canvas.view.on('zoom', () => {
+                updateState({})
+            })
+
             canvas.view.on('frame', () => {
-                if (!isEqual(actives.current, canvas.project.activedItems)) {
+                if (
+                    !isEqual(actives.current, canvas.project.activedItems) &&
+                    canvas.mainTool.actived
+                ) {
                     activedRects.current = []
                     group.current && group.current.remove()
                     group.current = null
@@ -41,8 +50,7 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                     !canvas.project.insertMode
                 ) {
                     const selectorStyle = {
-                        // strokeColor: 'rgba(128, 128, 128, 0.5)',
-                        strokeColor: 'red',
+                        strokeColor: theme.palette.canvas.selected.border,
                         strokeWidth: 0.5,
                         guide: true
                     }
@@ -60,18 +68,31 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                         rect.current = new canvas.Path.Rectangle(selector)
                         rect.current.set(selectorStyle)
 
-                        if (canvas.project.activedItems.length > 1) {
+                        if (
+                            canvas.project.activedItems.length > 1 &&
+                            canvas.project.activedItems.length < 200
+                        ) {
                             activedRects.current = canvas.project.activedItems.map(
                                 (item) => {
-                                    const rect = new canvas.Path.Rectangle(
-                                        item.bounds
-                                    )
-                                    rect.set(selectorStyle)
+                                    const rect =
+                                        (item instanceof canvas.Path &&
+                                            new canvas.Path(
+                                                (item as paper.Path).pathData
+                                            )) ||
+                                        new canvas.Path.Rectangle(item.bounds)
+
+                                    rect.set({
+                                        ...selectorStyle,
+                                        ...{
+                                            strokeColor:
+                                                theme.palette.canvas.highlight
+                                                    .border
+                                        }
+                                    })
                                     return rect
                                 }
                             )
                         }
-
                         group.current = new canvas.Group([
                             rect.current,
                             ...activedRects.current
@@ -79,18 +100,34 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                             guide: true
                         })
 
-                        group.current.sendToIndex(2)
+                        group.current.bringToFront()
                     } else {
                         rect.current.angle = selector.angle
                         rect.current.pathData = selector.pathData
 
-                        if (canvas.project.activedItems.length > 1) {
+                        if (
+                            canvas.project.activedItems.length > 1 &&
+                            canvas.project.activedItems.length < 200
+                        ) {
                             canvas.project.activedItems.map((item, index) => {
-                                activedRects.current[index] &&
-                                    (activedRects.current[index].bounds =
-                                        item.bounds)
+                                if (activedRects.current[index]) {
+                                    if (
+                                        activedRects.current[index] instanceof
+                                            canvas.Path &&
+                                        item instanceof canvas.Path
+                                    ) {
+                                        ;(activedRects.current[
+                                            index
+                                        ] as paper.Path).pathData =
+                                            item.pathData
+                                    } else {
+                                        activedRects.current[index].bounds =
+                                            item.bounds
+                                    }
+                                }
                             })
                         }
+                        group.current.bringToFront()
                     }
 
                     setSelector(selector)

@@ -1,6 +1,7 @@
 import { isEqual, isUndefined, remove } from 'lodash'
 import paper from 'paper'
 import { rotatePoint } from '../trigonometryUtils'
+import { generateUID } from '../layerUtils'
 
 type CornersNameType =
     | 'topLeft'
@@ -37,6 +38,7 @@ declare global {
             angle: number
             selector: paper.Selector
             selectionCache: boolean
+            uid: string
             scaleWithRotate: (
                 factor: paper.Point,
                 pivot?: paper.Point,
@@ -44,8 +46,11 @@ declare global {
                 angle?: number
             ) => void
             superRotate: (angle: number, center: paper.Point) => void
-            superExportJSON: (options?: object) => string
+            superExportJSON: (options?: any) => string
             sendToIndex: (index: number) => void
+            _initialize: (props: any, point: paper.Point) => boolean
+            superInitialize: (props: any, point: paper.Point) => boolean
+            superClone: (options?: any) => paper.Item
             _rotate: any
         }
         export interface PaperScope {
@@ -78,17 +83,48 @@ paper.Item.prototype.exportJSON = function (options?: object): string {
     }) as any
 
     item[1].data = {
-        ...(item.data || {}),
+        ...(item[1].data || {}),
         ...{
             actived: false,
-            id: this.id,
             layer: this.layer.index,
-            parent: this.parent.id,
+            parent: this.parent.uid,
             index: this.index
         }
     }
+    item[1].uid = this.uid
 
     return JSON.stringify(item)
+}
+
+paper.Item.prototype.superInitialize =
+    paper.Item.prototype.superInitialize || paper.Item.prototype._initialize
+
+paper.Item.prototype._initialize = function (
+    props: any,
+    point: paper.Point
+): boolean {
+    const item = paper.Item.prototype.superInitialize.call(this, props, point)
+
+    if (!props || !props.uid) {
+        this.uid = generateUID(16) + this.id
+    }
+
+    return item
+}
+
+paper.Item.prototype.superClone =
+    paper.Item.prototype.superClone || paper.Item.prototype.clone
+
+paper.Item.prototype.clone = function (options?: any): paper.Item {
+    const cloned = paper.Item.prototype.superClone.call(this, options)
+
+    if (!options || !options.keep) {
+        cloned.uid = generateUID(16) + this.id
+    } else {
+        cloned.uid = this.uid
+    }
+
+    return cloned
 }
 
 paper.Item.prototype.sendToIndex = function (index: number) {
@@ -103,7 +139,7 @@ paper.Item.prototype.scaleWithRotate = function (
 ) {
     center = center || this.bounds.center
     pivot = pivot || center
-    angle = isUndefined(angle) ? this.angle : 0
+    angle = (isUndefined(angle) && this.angle) || 0
 
     if (this.angle !== angle) {
         this.angle = 0
@@ -161,28 +197,6 @@ Object.defineProperty(paper.Item.prototype, 'guide', {
     set: function (status: boolean) {
         this.project.guides.addChild(this)
         this._guide = status
-    },
-    enumerable: false,
-    configurable: true
-})
-
-Object.defineProperty(paper.Item.prototype, 'id', {
-    get: function () {
-        return this._id
-    },
-    set: function (id: number) {
-        this._id = id
-    },
-    enumerable: false,
-    configurable: true
-})
-
-Object.defineProperty(paper.Item.prototype, '_id', {
-    get: function () {
-        return this.data.id
-    },
-    set: function (id: number) {
-        this.data.id = id
     },
     enumerable: false,
     configurable: true

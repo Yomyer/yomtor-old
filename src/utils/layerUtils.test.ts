@@ -1,8 +1,8 @@
-import { generateID, generateMachine } from './layer'
+import { generateUID, generateMachine } from './layerUtils'
 
 test('Generate random ID', () => {
-    const random1 = generateID()
-    const random2 = generateID(16)
+    const random1 = generateUID()
+    const random2 = generateUID(16)
 
     expect(typeof random1).toBe('string')
 

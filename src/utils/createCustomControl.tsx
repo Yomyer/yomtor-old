@@ -2,12 +2,15 @@ import React, {
     ForwardRefRenderFunction,
     MutableRefObject,
     RefObject,
+    useCallback,
     useContext,
+    useEffect,
     useRef
 } from 'react'
 import { EditorContext } from '../components/Yomtor'
 import paper from 'paper'
 import { clearCursor, Cursor, setCursor } from './cursorUtils'
+import { YomtorTheme } from '../styles/createTheme'
 export type CustomControlProps = {
     group: RefObject<paper.Group>
     selector: paper.Selector
@@ -42,11 +45,14 @@ type CreateCustomControlArgs = {
     onMouseLeave?: (event?: any) => void
 }
 
-export const createCustomControlDefaultItem = (canvas: paper.PaperScope) => {
+export const createCustomControlDefaultItem = (
+    canvas: paper.PaperScope,
+    theme: YomtorTheme
+) => {
     return new canvas.Path.Rectangle({
         size: 7,
-        fillColor: 'white',
-        strokeColor: 'rgba(0, 0, 0, 0.7)',
+        fillColor: theme.palette.canvas.corners.background,
+        strokeColor: theme.palette.canvas.corners.border,
         strokeWidth: 0.2
     })
 }
@@ -85,15 +91,26 @@ export const createCustomControl = ({
         },
         ref
     ) => {
-        const { canvas } = useContext(EditorContext)
+        const { canvas, theme } = useContext(EditorContext)
         const rect = useRef<paper.Item>(null)
+
+        const zoom = useCallback(() => {
+            if (!canvas) return
+            rect.current.scale(canvas.view.zoom)
+        }, [canvas])
+
+        useEffect(() => {
+            if (!canvas) return
+
+            canvas.view.on('zoom', zoom)
+        }, [canvas])
 
         if (canvas && group) {
             if (selector && selector.points) {
                 if (group.current && !rect.current) {
                     rect.current =
                         (item && item(canvas, group, selector)) ||
-                        createCustomControlDefaultItem(canvas)
+                        createCustomControlDefaultItem(canvas, theme)
 
                     rect.current.set({
                         guide: true,
@@ -114,6 +131,9 @@ export const createCustomControl = ({
 
                     rect.current.data.corner = corner
                     rect.current.data.offset = offset
+
+                    rect.current.strokeScaling = true
+                    zoom()
 
                     rect.current.onMouseEnter = (e: paper.MouseEvent) => {
                         cursor && setCursor(cursor)
@@ -136,10 +156,10 @@ export const createCustomControl = ({
 
                     group.current.addChild(rect.current)
                 } else if (rect.current) {
-                    rect.current.position = selector.points[corner].add(
-                        offset as any
-                    )
-                    rect.current.rotation = selector.angle - rect.current.angle
+                    rect.current.set({
+                        position: selector.points[corner].add(offset as any),
+                        rotation: selector.angle - rect.current.angle
+                    })
 
                     rect.current.bringToFront()
                 }

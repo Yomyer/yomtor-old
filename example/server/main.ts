@@ -37,6 +37,7 @@ io.on('connection', (socket: Socket) => {
 
         if (player) {
             player.changes = data
+            console.log(data)
             socket.broadcast.emit('players:changed', players)
             player.changes = []
         }

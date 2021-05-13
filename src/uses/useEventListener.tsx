@@ -1,5 +1,7 @@
 import { useRef, useEffect } from 'react'
 
+export const useShortCuts = () => {}
+
 export const useEventListener = (
     eventName: string,
     handler: any,

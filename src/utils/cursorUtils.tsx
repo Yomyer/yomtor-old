@@ -30,19 +30,22 @@ const createRetinaCursor = ({
     return cssText.join('')
 }
 
-export const setGlobalCursor = (cursor?: Cursor) => {
-    if (!document.querySelector('.global-cursor-' + name)) {
+export const setGlobalCursor = (cursor: Cursor) => {
+    const name = `global-cursor-${cursor.name}`
+
+    if (!document.querySelector(`.${name}`)) {
         const div = document.createElement('div')
         div.style.cssText =
             'position:fixed; z-index:5000; left:0; top:0; right: 0; bottom:0;'
 
-        if (cursor && cursor.cursor1x) {
+        if (cursor.cursor1x) {
             div.style.cssText += createRetinaCursor(cursor)
         } else {
-            div.style.cssText += `cursor: ${cursor.name}`
+            div.style.cssText += `cursor: ${cursor.keyword}`
         }
 
-        if (cursor) div.className = 'global-cursor global-cursor-' + cursor.name
+        div.className = `global-cursor ${name}`
+
         document.body.append(div)
     }
 }
@@ -55,14 +58,18 @@ export const clearGlobalCursor = (cursor?: Cursor) => {
     }
 }
 
-export const setCursor = (cursor?: Cursor) => {
+export const setCursor = (cursor?: Cursor, element?: HTMLElement) => {
+    element = element || document.body
+
     if (cursor && cursor.cursor1x) {
-        document.body.style.cssText += createRetinaCursor(cursor)
+        element.style.cssText += createRetinaCursor(cursor)
     } else {
-        document.body.style.cssText += `cursor: ${cursor.name}`
+        element.style.cssText += `cursor: ${cursor.name}`
     }
 }
 
-export const clearCursor = () => {
-    document.body.style.cursor = null
+export const clearCursor = (element?: HTMLElement) => {
+    element = (element instanceof HTMLElement && element) || document.body
+
+    element.style.cursor = null
 }

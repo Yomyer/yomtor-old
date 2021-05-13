@@ -48,10 +48,18 @@ export type TypeCanvas = {
         color: string
         background: string
     }
+    selected: {
+        border: string
+    }
     selector: {
+        background: string
         border: string
     }
     corners: {
+        background: string
+        border: string
+    }
+    highlight: {
         background: string
         border: string
     }
@@ -137,12 +145,20 @@ export const canvas: TypeCanvas = {
         color: 'white',
         background: 'rgba(128, 128, 128, 0.5)'
     },
+    selected: {
+        border: 'rgba(128, 128, 128, 0.5)'
+    },
     selector: {
-        border: ''
+        background: 'rgba(0, 142, 252, 0.1)',
+        border: 'rgba(0, 142, 252, 1)'
     },
     corners: {
-        background: '',
-        border: ''
+        background: 'white',
+        border: 'rgba(0, 0, 0, 0.7)'
+    },
+    highlight: {
+        background: 'rgba(0, 142, 252, 0.1)',
+        border: 'rgba(0, 142, 252, 1)'
     }
 }
 

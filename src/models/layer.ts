@@ -1,5 +1,5 @@
 import { isString, merge } from 'lodash'
-import { generateID, generateMachine } from '../apis/layer'
+import { generateUID, generateMachine } from '../utils/layerUtils'
 import { Point } from './point'
 import { Size } from './size'
 
@@ -37,7 +37,7 @@ export class Layer {
         merge(
             this,
             {
-                id: generateID(),
+                id: generateUID(),
                 type: 'layer',
                 machine: generateMachine(name.name),
                 visible: true,

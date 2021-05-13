@@ -90,7 +90,7 @@ paper.PaperScope.prototype.off = function (
 paper.PaperScope.prototype.fire = function (eventName: string, options?: any) {
     if (!this._eventListeners) return this
 
-    if (options) {
+    if (options && !options.items) {
         options.items = this.project.activedItems
     }
 

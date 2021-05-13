@@ -12,6 +12,10 @@ type PlayersToolProps = {
 }
 
 const PlayersTool: React.FC<PlayersToolProps> = ({ players, ...props }) => {
+    if (players.length === 1) {
+        players = []
+    }
+
     return (
         <>
             {players.map((player, index) => (

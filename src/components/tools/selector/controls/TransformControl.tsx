@@ -33,7 +33,7 @@ import { RotateS } from '../../../icons/cursor/RotateS'
 import { RotateSW } from '../../../icons/cursor/RotateSW'
 import { RotateW } from '../../../icons/cursor/RotateW'
 import { RotateNW } from '../../../icons/cursor/RotateNW'
-import { useEventListener } from '../../../../uses/useEventListener'
+import { useHotkeys } from '../../../../uses/useHokeys'
 
 export const TransformControlTopLeft = createCustomControl({})
 export const TransformControlTopCenter = createCustomControl({
@@ -124,12 +124,13 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                 .set({
                     visible: false
                 })
-                .clone()
+                .clone({ keep: true })
             clone.set({
                 visible: true,
                 actived: true,
                 guide: true
             })
+
             return clone
         })
     }
@@ -172,24 +173,23 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         if (e.modifiers.shift) {
             const signx = factor.x > 0 ? 1 : -1
             const signy = factor.y > 0 ? 1 : -1
+
             factor.x = factor.y = Math.max(
-                Math.abs(factor.x) * current.direction.x,
-                Math.abs(factor.y) * current.direction.y
+                Math.abs(factor.x * current.direction.x),
+                Math.abs(factor.y * current.direction.y)
             )
             factor.x *= signx
             factor.y *= signy
         }
 
-        const actives = canvas.project.activedItems.map((item) => {
-            return item.selector
-        })
-
-        actives.forEach((selector) => {
-            selector.item.scaleWithRotate(
+        canvas.project.activedItems.forEach((item) => {
+            item.scaleWithRotate(
                 factor,
                 current.pivot,
                 current.center,
-                actives.length === 1 ? undefined : current.angle
+                canvas.project.activedItems.length === 1
+                    ? undefined
+                    : current.angle
             )
         })
 
@@ -218,12 +218,8 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             delta = Math.round((delta - data.current.angle) / 15) * 15
         }
 
-        const actives = canvas.project.activedItems.map((item) => {
-            return item.selector
-        })
-
-        actives.forEach((selector) => {
-            selector.item.rotate(delta)
+        canvas.project.activedItems.forEach((item) => {
+            item.rotate(delta)
         })
 
         canvas.setInfo(`${delta - data.current.angle}º`, current.point)
@@ -307,7 +303,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     }, [tool])
 
     props.onMouseEnter = (e: paper.MouseEvent) => {
-        if (!tool.actived) {
+        if (!tool.actived && tool.activatedMain) {
             cursor.current = {
                 point: e.target.position,
                 angle: canvas.project.selectorItem.selector.angle
@@ -325,9 +321,11 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     }
 
     props.onMouseDown = (e: paper.MouseEvent) => {
+        if (!tool.activatedMain) return
+
         const cornerName = e.target.data.corner
         const rect = canvas.project.selectorItem
-        activeItems.current = [...canvas.project.activedItems].reverse()
+        activeItems.current = [...canvas.project.activedItems]
 
         const angle = rect.selector.angle
 
@@ -359,18 +357,22 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         tool.activate()
     }
 
-    useEventListener('keydown', (e: KeyboardEvent) => {
-        if (!tool.actived) {
-            mode.current = e.key === 'Meta' ? 'rotate' : 'resize'
-            showCursor()
-        }
-    })
-    useEventListener('keyup', () => {
-        if (!tool.actived) {
-            mode.current = 'resize'
-            showCursor()
-        }
-    })
+    useHotkeys(
+        '*+cmd',
+        () => {
+            if (!tool.actived) {
+                mode.current = 'rotate'
+                showCursor()
+            }
+        },
+        () => {
+            if (!tool.actived) {
+                mode.current = 'resize'
+                showCursor()
+            }
+        },
+        [tool]
+    )
 
     return (
         <>

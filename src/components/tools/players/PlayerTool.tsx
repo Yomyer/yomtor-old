@@ -40,7 +40,7 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
             canvas.on('selection:modified', (e: any) => {
                 onSelected(
                     e.items.map((item: paper.Path) => {
-                        return item.id
+                        return item.uid
                     })
                 )
             })
@@ -53,11 +53,15 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
                 .map((item) => canvas.project.importJSON(item))
                 .forEach((item: any) => {
                     const exists = canvas.project.getItem({
-                        id: item.id
+                        uid: item.uid
                     })
 
                     if (exists) {
-                        exists.replaceWith(item)
+                        if (item.data.deleted) {
+                            exists.remove()
+                        } else {
+                            exists.replaceWith(item)
+                        }
                     } else {
                         const layer = canvas.project.layers[item.data.layer]
                         if (layer) {
@@ -73,8 +77,8 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
         selectedItems.current = []
 
         if (player.selectedItems && player.selectedItems.length) {
-            player.selectedItems.forEach((id) => {
-                const item = canvas.project.getItem({ id })
+            player.selectedItems.forEach((uid) => {
+                const item = canvas.project.getItem({ uid })
                 if (item) {
                     const hightlight =
                         ((item as paper.Path).pathData &&

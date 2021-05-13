@@ -9,7 +9,7 @@ import {
     Properties,
     RectProperties,
     Yomtor,
-    Zoom,
+    ZoomTool,
     RectangleTool,
     SelectorTool,
     TransformControl,
@@ -18,7 +18,8 @@ import {
     PlayersTool,
     Player,
     Color,
-    colorWord
+    colorWord,
+    ViewTool
 } from 'yomtor'
 
 const ENDPOINT = 'http://localhost:4000'
@@ -146,11 +147,12 @@ const App = () => {
                         </OvalTool>
                     </Toolbar>
                     <Canvas>
-                        <Zoom />
+                        <ZoomTool />
                         <SelectorTool>
                             <TransformControl />
                         </SelectorTool>
                         <CursorInfoTool />
+                        <ViewTool />
                         <PlayersTool
                             life
                             players={players}

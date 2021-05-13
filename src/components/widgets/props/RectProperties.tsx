@@ -204,6 +204,7 @@ const RectProperties: React.FC = () => {
             return
         }
 
+        /*
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
         canvas.on('selection:cleared', () => updateRect())
@@ -213,6 +214,7 @@ const RectProperties: React.FC = () => {
         canvas.on('object:moved', () => updateRect(0))
         canvas.on('object:scaled', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
+        */
     }, [canvas])
 
     return (
