@@ -18,7 +18,7 @@ const rootReducer = combineReducers<any>({
     settings: SettingsReducer
 })
 
-export const store = (initialState?: State | any, mergeDeep?: boolean) => {
+export const store: any = (initialState?: State | any, mergeDeep?: boolean) => {
     initialState = mergeDeep
         ? mergeObjects(DefautState, initialState)
         : Object.assign(DefautState, initialState)
