@@ -51,7 +51,7 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                 ) {
                     const selectorStyle = {
                         strokeColor: theme.palette.canvas.selected.border,
-                        strokeWidth: 0.5,
+                        strokeWidth: 0.5 / canvas.view.zoom,
                         guide: true
                     }
 
@@ -104,6 +104,7 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                     } else {
                         rect.current.angle = selector.angle
                         rect.current.pathData = selector.pathData
+                        rect.current.strokeWidth = 0.5 / canvas.view.zoom
 
                         if (
                             canvas.project.activedItems.length > 1 &&
@@ -124,6 +125,9 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                                         activedRects.current[index].bounds =
                                             item.bounds
                                     }
+
+                                    activedRects.current[index].strokeWidth =
+                                        0.5 / canvas.view.zoom
                                 }
                             })
                         }

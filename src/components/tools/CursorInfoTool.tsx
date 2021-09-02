@@ -28,8 +28,11 @@ const CursorInfoTool: React.FC = () => {
             fillColor: theme.palette.canvas.info.color,
             point: [0, 0],
             content: info.label,
-            guide: true
+            fontSize: 12,
+            guide: true,
+            fontWeight: 200
         })
+
         const padding = new canvas.Point(16, 6)
         const background = new canvas.Path.Rectangle({
             rectangle: {
@@ -50,10 +53,11 @@ const CursorInfoTool: React.FC = () => {
         group.current = new canvas.Group([background, label])
         group.current.set({
             pivot: group.current.bounds.topLeft,
-            position: info.point && info.point.add(7),
+            position: info.point && info.point.add(7 / canvas.view.zoom),
             guide: true
         })
-        group.current.sendToIndex(4)
+        group.current.sendToIndex(5)
+        group.current.scale(1 / canvas.view.zoom)
         group.current.removeOn({
             drag: true,
             up: true

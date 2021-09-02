@@ -6,7 +6,7 @@ import paper from 'paper'
 type AvailableTags = 'INPUT' | 'TEXTAREA' | 'SELECT'
 
 export type HotKeysEvent = HotkeysEvent & {
-    direction: paper.Point
+    delta: paper.Point
     isPressed: (keyCode: any) => boolean
 }
 
@@ -34,20 +34,20 @@ const isKeyboardEventTriggeredByInput = (ev: KeyboardEvent) => {
     return tagFilter(ev, ['INPUT', 'TEXTAREA', 'SELECT'])
 }
 
-const getDirectionArrow = (ev: KeyboardEvent) => {
+const getDeltaArrow = (ev: KeyboardEvent) => {
     const point = new paper.Point(0, 0)
     switch (ev.code) {
         case 'ArrowUp':
-            point.y = 1
-            break
-        case 'ArrowDown':
             point.y = -1
             break
+        case 'ArrowDown':
+            point.y = 1
+            break
         case 'ArrowLeft':
-            point.x = 1
+            point.x = -1
             break
         case 'ArrowRight':
-            point.x = -1
+            point.x = 1
             break
     }
 
@@ -180,8 +180,8 @@ export function useHotkeys<T extends Element>(
             }
 
             if (isArrows) {
-                const point = getDirectionArrow(keyboardEvent)
-                hotkeysEvent.direction = point
+                const point = getDeltaArrow(keyboardEvent)
+                hotkeysEvent.delta = point
             }
 
             if (

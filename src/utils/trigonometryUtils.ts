@@ -11,10 +11,14 @@ export const radiansToDegrees = function (radians: number): number {
 }
 
 export function findCornerQuadrant(
-    cursor: { point: paper.Point; angle: number },
+    cursor: { point?: paper.Point; corner?: paper.Item; angle: number },
     item: paper.Item
 ) {
-    const point = rotatePoint(cursor.point, item.position, -cursor.angle || 0)
+    const point = rotatePoint(
+        cursor.point || cursor.corner.position,
+        item.position,
+        -cursor.angle || 0
+    )
     const direction = sign(normalize(point.subtract(item.position)))
 
     const delta =

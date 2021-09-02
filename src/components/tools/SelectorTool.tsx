@@ -1,6 +1,12 @@
 import { differenceWith, intersectionWith, isEqual } from 'lodash'
-import React, { useContext, useEffect, useRef, useState } from 'react'
-import { round } from '../../utils/mathUtils'
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState
+} from 'react'
+import { useHotkeys, HotKeysEvent } from '../../uses/useHokeys'
 import { EditorContext } from '../Yomtor'
 import SelectorSelect from './selector/SelectorSelect'
 
@@ -84,6 +90,7 @@ const SelectorTool: React.FC = ({ children }) => {
                 to: e.point,
                 strokeColor: theme.palette.canvas.selector.border,
                 fillColor: theme.palette.canvas.selector.background,
+                strokeWidth: 1 / canvas.view.zoom,
                 guide: true
             })
         }
@@ -124,6 +131,37 @@ const SelectorTool: React.FC = ({ children }) => {
             }
         }
     }
+    const move = useCallback(
+        (e: any) => {
+            canvas.project.activedItems.forEach((item) => {
+                item.position = item.position.add(e.delta)
+            })
+
+            if (mode.current === 'move') {
+                canvas.fire('object:moving', e)
+            }
+        },
+        [canvas]
+    )
+
+    const arrowMove = useCallback(
+        (e: HotKeysEvent) => {
+            if (
+                tool &&
+                tool.activatedMain &&
+                canvas.project.activedItems.length &&
+                !e.isPressed('cmd')
+            ) {
+                mode.current = 'move'
+
+                e.delta = e.delta.multiply((e.isPressed('shift') && 10) || 1)
+                move(e)
+
+                mode.current = 'select'
+            }
+        },
+        [tool]
+    )
 
     useEffect(() => {
         if (!canvas) return
@@ -209,6 +247,8 @@ const SelectorTool: React.FC = ({ children }) => {
                 if (!item) {
                     mode.current = 'select'
                 }
+
+                console.log(item)
             }
         }
 
@@ -229,15 +269,7 @@ const SelectorTool: React.FC = ({ children }) => {
             cloneController()
 
             if (['move', 'clone'].includes(mode.current)) {
-                canvas.project.activedItems.forEach((item) => {
-                    item.pivot = item.bounds.topLeft
-                    item.position = round(item.position.add(e.delta))
-                    item.pivot = item.bounds.center
-                })
-
-                if (mode.current === 'move') {
-                    canvas.fire('object:moving', e)
-                }
+                move(e)
             }
             if (mode.current === 'select') {
                 rectSelectorController(e)
@@ -257,7 +289,7 @@ const SelectorTool: React.FC = ({ children }) => {
 
                 hightlight.current.set({
                     strokeColor: theme.palette.canvas.highlight.border,
-                    strokeWidth: 2,
+                    strokeWidth: 2 / canvas.view.zoom,
                     guide: true
                 })
             }
@@ -310,7 +342,21 @@ const SelectorTool: React.FC = ({ children }) => {
                 rectSelectorController(e)
             }
         }
+
+        canvas.view.on('zoom', () => {
+            if (!hightlight.current) return
+
+            hightlight.current.strokeWidth = 2 / canvas.view.zoom
+        })
     }, [tool])
+
+    useHotkeys(
+        'arrows,shift+arrows',
+        (_, e: HotKeysEvent) => {
+            arrowMove(e)
+        },
+        [tool]
+    )
 
     return <SelectorSelect ref={selector}>{children}</SelectorSelect>
 }

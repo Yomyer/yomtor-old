@@ -1,5 +1,6 @@
 import React, {
     RefObject,
+    useCallback,
     useContext,
     useEffect,
     useRef,
@@ -33,7 +34,7 @@ import { RotateS } from '../../../icons/cursor/RotateS'
 import { RotateSW } from '../../../icons/cursor/RotateSW'
 import { RotateW } from '../../../icons/cursor/RotateW'
 import { RotateNW } from '../../../icons/cursor/RotateNW'
-import { useHotkeys } from '../../../../uses/useHokeys'
+import { HotKeysEvent, useHotkeys } from '../../../../uses/useHokeys'
 
 export const TransformControlTopLeft = createCustomControl({})
 export const TransformControlTopCenter = createCustomControl({
@@ -94,9 +95,16 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     const { canvas } = useContext(EditorContext)
     const props: CustomControlProps = { group, selector }
     const mode = useRef<'resize' | 'rotate'>('resize')
-    const cursor = useRef<{ point: paper.Point; angle: number }>(null)
+    const cursor = useRef<{
+        point?: paper.Point
+        angle: number
+        corner?: paper.Item
+    }>(null)
     const activeItems = useRef<paper.Item[]>([])
     const activeHelpers = useRef<paper.Item[]>([])
+
+    const corner = useRef<paper.Item>(null)
+
     const data = useRef<{
         pivot: paper.Point
         pivotOrigin: paper.Point
@@ -210,19 +218,22 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             helperControl()
         }
 
-        const origin = data.current.handler.subtract(current.center).angle
-        const rotate = data.current.point.subtract(current.center).angle
-        let delta = round(rotate - origin)
+        const origin = data.current.handler.subtract(current.center).angle % 360
+        const rotate = data.current.point.subtract(current.center).angle % 360
+        let delta = round(rotate - origin) % 360
 
         if (e.modifiers.shift) {
-            delta = Math.round((delta - data.current.angle) / 15) * 15
+            delta = (Math.round((delta - data.current.angle) / 15) * 15) % 360
         }
 
         canvas.project.activedItems.forEach((item) => {
             item.rotate(delta)
         })
 
-        canvas.setInfo(`${delta - data.current.angle}º`, current.point)
+        canvas.setInfo(
+            `${canvas.project.selectorItem.angle % 181}º`,
+            current.point
+        )
 
         canvas.fire('object:rotating', e)
 
@@ -232,6 +243,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     const showCursor = (global = false) => {
         clearCursor()
         clearGlobalCursor()
+
         if (!cursor.current) return
 
         const index = findCornerQuadrant(
@@ -246,6 +258,39 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
 
         global ? setGlobalCursor(cursors[index]) : setCursor(cursors[index])
     }
+
+    const arrowTransform = useCallback(
+        (e: HotKeysEvent) => {
+            if (
+                tool &&
+                tool.activatedMain &&
+                canvas.project.activedItems.length
+            ) {
+                const point = e.delta
+                    .multiply((e.isPressed('shift') && 10) || 1)
+                    .multiply(-1)
+
+                const actives = canvas.project.activedItems.map((item) => {
+                    return item.selector
+                })
+
+                actives.forEach((selector: paper.Selector) => {
+                    const size = new canvas.Point(selector.size)
+                    const newSize = size.add(point)
+
+                    const factor = size.divide(newSize)
+
+                    selector.item.scaleWithRotate(
+                        factor,
+                        selector.points.topLeft
+                    )
+                })
+
+                canvas.fire('object:scaling', e)
+            }
+        },
+        [tool]
+    )
 
     useEffect(() => {
         if (!canvas) return
@@ -292,7 +337,9 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                     hitResult.item.emit('mouseenter', event)
                 }
             }
+
             cursor.current = null
+
             canvas.clearInfo()
 
             canvas.fire(
@@ -300,13 +347,26 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                 e
             )
         }
+
+        canvas.view.on('mousemove', (e: paper.MouseEvent) => {
+            corner.current = null
+
+            if (e.target && e.target.data && e.target.data.isControl) {
+                corner.current = e.target
+            }
+
+            if (!cursor.current) {
+                clearCursor()
+            }
+        })
     }, [tool])
 
     props.onMouseEnter = (e: paper.MouseEvent) => {
         if (!tool.actived && tool.activatedMain) {
             cursor.current = {
+                angle: canvas.project.selectorItem.selector.angle,
                 point: e.target.position,
-                angle: canvas.project.selectorItem.selector.angle
+                corner: e.target
             }
             mode.current = e.modifiers.meta ? 'rotate' : 'resize'
             showCursor()
@@ -361,8 +421,20 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         '*+cmd',
         () => {
             if (!tool.actived) {
-                mode.current = 'rotate'
-                showCursor()
+                if (
+                    canvas.project.selectorItem &&
+                    corner.current &&
+                    mode.current !== 'rotate'
+                ) {
+                    console.log('xD')
+                    mode.current = 'rotate'
+                    cursor.current = {
+                        point: corner.current.position,
+                        corner: corner.current,
+                        angle: canvas.project.selectorItem.selector.angle
+                    }
+                    showCursor()
+                }
             }
         },
         () => {
@@ -370,6 +442,14 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                 mode.current = 'resize'
                 showCursor()
             }
+        },
+        [tool, canvas]
+    )
+
+    useHotkeys(
+        'cmd+arrows,cmd+shift+arrows',
+        (_, e: HotKeysEvent) => {
+            arrowTransform(e)
         },
         [tool]
     )

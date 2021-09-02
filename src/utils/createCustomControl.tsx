@@ -93,16 +93,43 @@ export const createCustomControl = ({
     ) => {
         const { canvas, theme } = useContext(EditorContext)
         const rect = useRef<paper.Item>(null)
+        const originalParams = useRef<any>(null)
+        const oldScale = useRef<number>(1)
 
-        const zoom = useCallback(() => {
-            if (!canvas) return
-            rect.current.scale(canvas.view.zoom)
-        }, [canvas])
+        const zoom = useCallback(
+            (reset = false) => {
+                if (!canvas || !rect.current) return
+
+                if (!originalParams.current) {
+                    originalParams.current = {
+                        shadowBlur: rect.current.shadowBlur,
+                        shadowOffset: rect.current.shadowOffset,
+                        strokeWidth: rect.current.strokeWidth
+                    }
+                }
+
+                rect.current.set({
+                    shadowBlur:
+                        originalParams.current.shadowBlur / canvas.view.zoom,
+                    shadowOffset:
+                        originalParams.current.shadowOffset / canvas.view.zoom,
+                    strokeWidth:
+                        originalParams.current.strokeWidth / canvas.view.zoom
+                })
+
+                rect.current.scale((reset && 1) || oldScale.current)
+                rect.current.scale(1 / canvas.view.zoom)
+                rect.current.data.isControl = true
+
+                oldScale.current = canvas.view.zoom
+            },
+            [canvas]
+        )
 
         useEffect(() => {
             if (!canvas) return
 
-            canvas.view.on('zoom', zoom)
+            canvas.view.on('zoom', () => zoom())
         }, [canvas])
 
         if (canvas && group) {
@@ -118,9 +145,11 @@ export const createCustomControl = ({
                         shadowBlur: 2,
                         shadowOffset: 1,
                         position: selector.points[corner].add(offset as any),
-                        rotation: selector.angle
+                        rotation: selector.angle,
+                        strokeScaling: true
                     })
 
+                    canvas.project.currentStyle.strokeScaling = true
                     rect.current.onFrame = frame || onFrame
                     rect.current.onMouseDown = mouseDown || onMouseDown
                     rect.current.onMouseDrag = mouseDrag || onMouseDrag
@@ -132,8 +161,7 @@ export const createCustomControl = ({
                     rect.current.data.corner = corner
                     rect.current.data.offset = offset
 
-                    rect.current.strokeScaling = true
-                    zoom()
+                    zoom(true)
 
                     rect.current.onMouseEnter = (e: paper.MouseEvent) => {
                         cursor && setCursor(cursor)

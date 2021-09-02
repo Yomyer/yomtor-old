@@ -68,7 +68,7 @@ export const setCursor = (cursor?: Cursor, element?: HTMLElement) => {
     }
 }
 
-export const clearCursor = (element?: HTMLElement) => {
+export const clearCursor = (element?: any) => {
     element = (element instanceof HTMLElement && element) || document.body
 
     element.style.cursor = null

@@ -103,13 +103,13 @@ paper.Item.prototype._initialize = function (
     props: any,
     point: paper.Point
 ): boolean {
-    const item = paper.Item.prototype.superInitialize.call(this, props, point)
+    const init = paper.Item.prototype.superInitialize.call(this, props, point)
 
     if (!props || !props.uid) {
         this.uid = generateUID(16) + this.id
     }
 
-    return item
+    return init
 }
 
 paper.Item.prototype.superClone =

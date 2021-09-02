@@ -28,7 +28,9 @@ const ViewTool: React.FC = ({ children }) => {
             if (tool && tool.activatedMain) {
                 const point = new canvas.Point(e.deltaX, e.deltaY).divide(2)
 
-                canvas.view.center = canvas.view.center.add(point)
+                canvas.view.center = canvas.view.center.add(
+                    point.divide(canvas.view.zoom)
+                )
             }
         },
         [tool]
@@ -41,11 +43,13 @@ const ViewTool: React.FC = ({ children }) => {
                 tool.activatedMain &&
                 !canvas.project.activedItems.length
             ) {
-                const point = e.direction
+                const point = e.delta
                     .multiply((e.isPressed('shift') && 10) || 1)
-                    .multiply(5)
+                    .multiply(-5)
 
-                canvas.view.center = canvas.view.center.add(point)
+                canvas.view.center = canvas.view.center.add(
+                    point.divide(canvas.view.zoom)
+                )
             }
         },
         [tool]
@@ -72,6 +76,10 @@ const ViewTool: React.FC = ({ children }) => {
         tool.onMouseUp = () => {
             clearGlobalCursor(Grabbing)
         }
+
+        canvas.view.on('mousemove', (e: paper.MouseEvent) => {
+            offset.current = e.point
+        })
     }, [tool])
 
     useHotkeys(
@@ -80,7 +88,7 @@ const ViewTool: React.FC = ({ children }) => {
             if (tool && tool.activatedMain) {
                 setCursor(Grab, canvas.view.element)
 
-                downPoint.current = canvas.view.viewToProject(offset.current)
+                downPoint.current = offset.current
                 tool.activate()
             }
             return false
@@ -102,16 +110,6 @@ const ViewTool: React.FC = ({ children }) => {
             arrowMove(e)
         },
         [tool]
-    )
-
-    useEventListener(
-        'mousemove',
-        (e: MouseEvent) => {
-            if (canvas) {
-                offset.current = new canvas.Point(e.offsetX, e.offsetY)
-            }
-        },
-        canvas && canvas.view.element
     )
 
     useEventListener(

@@ -146,7 +146,7 @@ export const canvas: TypeCanvas = {
         background: 'rgba(128, 128, 128, 0.5)'
     },
     selected: {
-        border: 'rgba(128, 128, 128, 0.5)'
+        border: 'rgba(200, 200, 200, 0.5)'
     },
     selector: {
         background: 'rgba(0, 142, 252, 0.1)',
