@@ -1,8 +1,0 @@
-import './paperScope'
-import './paperItem'
-import './paperProject'
-import './paperTool'
-import './paperHitResult'
-import './paperSelector'
-import './paperToolEvent'
-import './paperDraw'

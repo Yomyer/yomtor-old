@@ -8,6 +8,7 @@ import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
 import { createTheme } from '../styles'
 import { YomtorTheme } from '../styles/createTheme'
+import paper from '@yomyer/paper'
 
 type Props = {
     settings?: Settings
@@ -35,7 +36,6 @@ const Yomtor: React.FC<Props> = ({
     overrideSettings
 }) => {
     const [canvas, setCanvas] = useState<paper.PaperScope | null>(null)
-
     const initCanvas = (c: paper.PaperScope): void => {
         setCanvas(c)
     }
