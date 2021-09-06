@@ -1,3 +1,12 @@
+import {
+    Group,
+    Item,
+    KeyEvent,
+    Path,
+    Point,
+    Tool,
+    ToolEvent
+} from '@yomyer/paper'
 import { differenceWith, intersectionWith, isEqual } from 'lodash'
 import React, {
     useCallback,
@@ -12,28 +21,28 @@ import SelectorSelect from './selector/SelectorSelect'
 
 const SelectorTool: React.FC = ({ children }) => {
     const { canvas, theme } = useContext(EditorContext)
-    const [tool, setTool] = useState<paper.Tool>()
-    const hightlight = useRef<paper.Item>(null)
-    const selector = useRef<paper.Group>(null)
+    const [tool, setTool] = useState<Tool>()
+    const hightlight = useRef<Item>(null)
+    const selector = useRef<Group>(null)
     const mode = useRef<string>('select')
-    const activedItems = useRef<paper.Item[]>([])
-    const clonedItems = useRef<paper.Item[]>([])
-    const selectRect = useRef<paper.Path.Rectangle>(null)
-    const beforePositions = useRef<paper.Point[]>([])
+    const activedItems = useRef<Item[]>([])
+    const clonedItems = useRef<Item[]>([])
+    const selectRect = useRef<Path>(null)
+    const beforePositions = useRef<Point[]>([])
 
     const isActiveItemsUpdated = (): boolean => {
         return isEqual(
             activedItems.current.map((item) => item.uid),
-            canvas.project.activedItems.map((item) => item.uid)
+            canvas.project.activeItems.map((item) => item.uid)
         )
     }
     const updateAtiveItems = () => {
-        activedItems.current = [...canvas.project.activedItems]
+        activedItems.current = [...canvas.project.activeItems]
     }
 
     const setBeforePositions = () => {
         if (!beforePositions.current.length) {
-            beforePositions.current = canvas.project.activedItems.map(
+            beforePositions.current = canvas.project.activeItems.map(
                 (item) => item.position
             )
         }
@@ -42,8 +51,8 @@ const SelectorTool: React.FC = ({ children }) => {
     const cloneController = () => {
         if (mode.current === 'clone') {
             if (!clonedItems.current.length) {
-                activedItems.current = [...canvas.project.activedItems]
-                clonedItems.current = canvas.project.activedItems.map((item) =>
+                activedItems.current = [...canvas.project.activeItems]
+                clonedItems.current = canvas.project.activeItems.map((item) =>
                     item.clone()
                 )
                 canvas.project.deactivateAll()
@@ -83,7 +92,7 @@ const SelectorTool: React.FC = ({ children }) => {
         }
     }
 
-    const rectSelectorController = (e: paper.KeyEvent | paper.ToolEvent) => {
+    const rectSelectorController = (e: KeyEvent | ToolEvent) => {
         if (e instanceof canvas.ToolEvent) {
             selectRect.current = new canvas.Path.Rectangle({
                 from: e.downPoint,
@@ -98,7 +107,7 @@ const SelectorTool: React.FC = ({ children }) => {
         if (selectRect.current) {
             const match = {
                 class: canvas.Item,
-                match: (item: paper.Item) => {
+                match: (item: Item) => {
                     return !item.guide && !['Layer'].includes(item.className)
                 }
             }
@@ -133,7 +142,7 @@ const SelectorTool: React.FC = ({ children }) => {
     }
     const move = useCallback(
         (e: any) => {
-            canvas.project.activedItems.forEach((item) => {
+            canvas.project.activeItems.forEach((item) => {
                 item.position = item.position.add(e.delta)
             })
 
@@ -148,8 +157,8 @@ const SelectorTool: React.FC = ({ children }) => {
         (e: HotKeysEvent) => {
             if (
                 tool &&
-                tool.activatedMain &&
-                canvas.project.activedItems.length &&
+                tool.isMain &&
+                canvas.project.activeItems.length &&
                 !e.isPressed('cmd')
             ) {
                 mode.current = 'move'
@@ -176,7 +185,7 @@ const SelectorTool: React.FC = ({ children }) => {
         tool.onActivate = () => {
             if (!isActiveItemsUpdated()) {
                 canvas.fire('selection:created', {
-                    ...{ items: canvas.project.activedItems }
+                    ...{ items: canvas.project.activeItems }
                 })
                 updateAtiveItems()
             }
@@ -193,7 +202,7 @@ const SelectorTool: React.FC = ({ children }) => {
             updateAtiveItems()
         }
 
-        tool.onMouseDown = (e: paper.ToolEvent) => {
+        tool.onMouseDown = (e: ToolEvent) => {
             let action = null
             mode.current = 'select'
 
@@ -212,7 +221,7 @@ const SelectorTool: React.FC = ({ children }) => {
 
                 const item = canvas.project.getItemByPoint(e.downPoint)
 
-                const updated = canvas.project.activedItems.length
+                const updated = canvas.project.activeItems.length
                     ? 'updated'
                     : 'created'
 
@@ -252,7 +261,7 @@ const SelectorTool: React.FC = ({ children }) => {
             }
         }
 
-        tool.onMouseDrag = (e: paper.ToolEvent) => {
+        tool.onMouseDrag = (e: ToolEvent) => {
             if (!e.downPoint || !e.point) {
                 return
             }
@@ -276,15 +285,15 @@ const SelectorTool: React.FC = ({ children }) => {
             }
         }
 
-        tool.onMouseMove = (e: paper.ToolEvent) => {
+        tool.onMouseMove = (e: ToolEvent) => {
             if (hightlight.current) hightlight.current.remove()
 
             const item = canvas.project.getItemByPoint(e.point)
 
             if (item && !item.actived) {
                 hightlight.current =
-                    ((item as paper.Path).pathData &&
-                        new canvas.Path((item as paper.Path).pathData)) ||
+                    ((item as Path).pathData &&
+                        new canvas.Path((item as Path).pathData)) ||
                     new canvas.Path.Rectangle(item.bounds)
 
                 hightlight.current.set({
@@ -295,7 +304,7 @@ const SelectorTool: React.FC = ({ children }) => {
             }
         }
 
-        tool.onMouseUp = (e: paper.ToolEvent) => {
+        tool.onMouseUp = (e: ToolEvent) => {
             clonedItems.current = []
             beforePositions.current = []
 
@@ -307,7 +316,7 @@ const SelectorTool: React.FC = ({ children }) => {
             updateAtiveItems()
         }
 
-        tool.onKeyDown = (e: paper.KeyEvent) => {
+        tool.onKeyDown = (e: KeyEvent) => {
             if (e.modifiers.alt && mode.current === 'move') {
                 mode.current = 'clone'
                 cloneController()
@@ -319,18 +328,18 @@ const SelectorTool: React.FC = ({ children }) => {
 
             if (['delete', 'backspace'].includes(e.key)) {
                 canvas.fire('object:deleted', {
-                    items: canvas.project.activedItems.map((item) => {
+                    items: canvas.project.activeItems.map((item) => {
                         item.data.deleted = true
                         return item
                     })
                 })
 
-                canvas.project.activedItems.forEach((item) => item.remove())
+                canvas.project.activeItems.forEach((item) => item.remove())
                 canvas.project.deactivateAll()
             }
         }
 
-        tool.onKeyUp = (e: paper.KeyEvent) => {
+        tool.onKeyUp = (e: KeyEvent) => {
             if (!e.modifiers.alt && mode.current === 'clone') {
                 mode.current = 'move'
                 cloneController()

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from 'react'
 import { createUseStyles } from 'react-jss'
 import { EditorContext } from '../Yomtor'
-import paper from 'paper'
+import paper from '@yomyer/paper'
 
 type Props = {
     actions?: React.ReactNode

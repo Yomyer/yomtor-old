@@ -1,3 +1,4 @@
+import { Group, Item, Path, Selector } from '@yomyer/paper'
 import { isEqual } from 'lodash'
 import React, {
     forwardRef,
@@ -10,17 +11,17 @@ import React, {
 
 import { EditorContext } from '../../Yomtor'
 
-const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
+const SelectorSelect = forwardRef<Group, { children: React.ReactNode }>(
     ({ children }, ref) => {
         const { canvas, theme } = useContext(EditorContext)
-        const [selector, setSelector] = useState<paper.Selector>(null)
+        const [selector, setSelector] = useState<Selector>(null)
         const [, updateState] = useState<any>()
 
-        const group = useRef<paper.Group>(null)
-        const activedRects = useRef<paper.Item[]>([])
-        const rect = useRef<paper.Path.Rectangle>(null)
-        const actives = useRef<paper.Item[]>([])
-        const clone = useRef<paper.Group>(null)
+        const group = useRef<Group>(null)
+        const activedRects = useRef<Item[]>([])
+        const rect = useRef<Path>(null)
+        const actives = useRef<Item[]>([])
+        const clone = useRef<Group>(null)
 
         useEffect(() => {
             if (!canvas) return
@@ -35,18 +36,18 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
 
             canvas.view.on('frame', () => {
                 if (
-                    !isEqual(actives.current, canvas.project.activedItems) &&
+                    !isEqual(actives.current, canvas.project.activeItems) &&
                     canvas.mainTool.actived
                 ) {
                     activedRects.current = []
                     group.current && group.current.remove()
                     group.current = null
-                    actives.current = [...canvas.project.activedItems]
+                    actives.current = [...canvas.project.activeItems]
                     setSelector(null)
                 }
 
                 if (
-                    canvas.project.activedItems.length &&
+                    canvas.project.activeItems.length &&
                     !canvas.project.insertMode
                 ) {
                     const selectorStyle = {
@@ -56,7 +57,7 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                     }
 
                     clone.current.addChildren(
-                        canvas.project.activedItems.map((item) => {
+                        canvas.project.activeItems.map((item) => {
                             return item.clone({ insert: false })
                         })
                     )
@@ -69,15 +70,15 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                         rect.current.set(selectorStyle)
 
                         if (
-                            canvas.project.activedItems.length > 1 &&
-                            canvas.project.activedItems.length < 200
+                            canvas.project.activeItems.length > 1 &&
+                            canvas.project.activeItems.length < 200
                         ) {
-                            activedRects.current = canvas.project.activedItems.map(
+                            activedRects.current = canvas.project.activeItems.map(
                                 (item) => {
                                     const rect =
                                         (item instanceof canvas.Path &&
                                             new canvas.Path(
-                                                (item as paper.Path).pathData
+                                                (item as Path).pathData
                                             )) ||
                                         new canvas.Path.Rectangle(item.bounds)
 
@@ -107,10 +108,10 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                         rect.current.strokeWidth = 0.5 / canvas.view.zoom
 
                         if (
-                            canvas.project.activedItems.length > 1 &&
-                            canvas.project.activedItems.length < 200
+                            canvas.project.activeItems.length > 1 &&
+                            canvas.project.activeItems.length < 200
                         ) {
-                            canvas.project.activedItems.map((item, index) => {
+                            canvas.project.activeItems.map((item, index) => {
                                 if (activedRects.current[index]) {
                                     if (
                                         activedRects.current[index] instanceof
@@ -119,8 +120,7 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
                                     ) {
                                         ;(activedRects.current[
                                             index
-                                        ] as paper.Path).pathData =
-                                            item.pathData
+                                        ] as Path).pathData = item.pathData
                                     } else {
                                         activedRects.current[index].bounds =
                                             item.bounds
@@ -136,8 +136,8 @@ const SelectorSelect = forwardRef<paper.Group, { children: React.ReactNode }>(
 
                     setSelector(selector)
                 }
-                canvas.project.selectorItem = rect.current
-                ;(ref as MutableRefObject<paper.Group>).current = group.current
+                canvas.project.itemSelector = rect.current
+                ;(ref as MutableRefObject<Group>).current = group.current
             })
         }, [canvas])
 

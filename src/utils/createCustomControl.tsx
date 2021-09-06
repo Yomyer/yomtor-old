@@ -8,12 +8,13 @@ import React, {
     useRef
 } from 'react'
 import { EditorContext } from '../components/Yomtor'
-import paper from 'paper'
 import { clearCursor, Cursor, setCursor } from './cursorUtils'
 import { YomtorTheme } from '../styles/createTheme'
+import { Group, Item, PaperScope, Point, Selector } from '@yomyer/paper'
+
 export type CustomControlProps = {
-    group: RefObject<paper.Group>
-    selector: paper.Selector
+    group: RefObject<Group>
+    selector: Selector
     onFrame?: (event?: any) => void
     onMouseDown?: (event?: any) => void
     onMouseDrag?: (event?: any) => void
@@ -26,14 +27,14 @@ export type CustomControlProps = {
 }
 
 type CreateCustomControlArgs = {
-    corner?: paper.CornersName
-    offset?: paper.Point | number
+    corner?: string
+    offset?: Point | number
     cursor?: Cursor
     item?: (
-        canvas: paper.PaperScope,
-        group?: RefObject<paper.Group>,
-        selector?: paper.Selector
-    ) => paper.Item
+        canvas: PaperScope,
+        group?: RefObject<Group>,
+        selector?: Selector
+    ) => Item
     onFrame?: (event?: any) => void
     onMouseDown?: (event?: any) => void
     onMouseDrag?: (event?: any) => void
@@ -46,7 +47,7 @@ type CreateCustomControlArgs = {
 }
 
 export const createCustomControlDefaultItem = (
-    canvas: paper.PaperScope,
+    canvas: PaperScope,
     theme: YomtorTheme
 ) => {
     return new canvas.Path.Rectangle({
@@ -59,7 +60,7 @@ export const createCustomControlDefaultItem = (
 
 export const createCustomControl = ({
     item,
-    offset = new paper.Point(0, 0),
+    offset = new Point(0, 0),
     corner = 'topLeft',
     cursor,
     onFrame = () => {},
@@ -72,10 +73,7 @@ export const createCustomControl = ({
     onMouseEnter = () => {},
     onMouseLeave = () => {}
 }: CreateCustomControlArgs): React.FC<CustomControlProps> => {
-    const Component: ForwardRefRenderFunction<
-        paper.Item,
-        CustomControlProps
-    > = (
+    const Component: ForwardRefRenderFunction<Item, CustomControlProps> = (
         {
             selector,
             group,
@@ -92,7 +90,7 @@ export const createCustomControl = ({
         ref
     ) => {
         const { canvas, theme } = useContext(EditorContext)
-        const rect = useRef<paper.Item>(null)
+        const rect = useRef<Item>(null)
         const originalParams = useRef<any>(null)
         const oldScale = useRef<number>(1)
 
@@ -163,7 +161,7 @@ export const createCustomControl = ({
 
                     zoom(true)
 
-                    rect.current.onMouseEnter = (e: paper.MouseEvent) => {
+                    rect.current.onMouseEnter = (e: MouseEvent) => {
                         cursor && setCursor(cursor)
 
                         if (mouseEnter) {
@@ -172,7 +170,7 @@ export const createCustomControl = ({
                             onMouseEnter(e)
                         }
                     }
-                    rect.current.onMouseLeave = (e: paper.MouseEvent) => {
+                    rect.current.onMouseLeave = (e: MouseEvent) => {
                         cursor && clearCursor()
 
                         if (mouseLeave) {
@@ -196,7 +194,7 @@ export const createCustomControl = ({
             }
 
             if (ref) {
-                ;(ref as MutableRefObject<paper.Item>).current = rect.current
+                ;(ref as MutableRefObject<Item>).current = rect.current
             }
         }
         return <></>

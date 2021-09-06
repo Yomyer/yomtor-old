@@ -1,3 +1,3 @@
-import paper from 'paper'
+import { Point as PointPaper } from '@yomyer/paper'
 
-export class Point extends paper.Point {}
+export class Point extends PointPaper {}

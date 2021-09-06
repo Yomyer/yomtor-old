@@ -1,12 +1,11 @@
 import hotkeys, { HotkeysEvent } from 'hotkeys-js'
 import React, { useCallback, useEffect, useRef } from 'react'
 import { intersectionWith } from 'lodash'
-import paper from 'paper'
-
+import { Point } from '@yomyer/paper'
 type AvailableTags = 'INPUT' | 'TEXTAREA' | 'SELECT'
 
 export type HotKeysEvent = HotkeysEvent & {
-    delta: paper.Point
+    delta: Point
     isPressed: (keyCode: any) => boolean
 }
 
@@ -35,7 +34,7 @@ const isKeyboardEventTriggeredByInput = (ev: KeyboardEvent) => {
 }
 
 const getDeltaArrow = (ev: KeyboardEvent) => {
-    const point = new paper.Point(0, 0)
+    const point = new Point(0, 0)
     switch (ev.code) {
         case 'ArrowUp':
             point.y = -1

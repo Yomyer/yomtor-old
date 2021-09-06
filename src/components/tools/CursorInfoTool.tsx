@@ -1,19 +1,20 @@
+import { Group, Point } from '@yomyer/paper'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { EditorContext } from '../Yomtor'
 
 const CursorInfoTool: React.FC = () => {
     const { canvas, theme } = useContext(EditorContext)
-    const group = useRef<paper.Group>(null)
+    const group = useRef<Group>(null)
 
     const [info, setInfo] = useState<{
         label: string
-        point: paper.Point
+        point: Point
     }>(null)
 
     useEffect(() => {
         if (!canvas) return
 
-        canvas.on('info:updated', (info) => {
+        canvas.on('info:updated', (info: any) => {
             setInfo(info)
         })
     }, [canvas])

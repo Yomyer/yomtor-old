@@ -16,16 +16,17 @@ import {
     setCursor
 } from '../../utils/cursorUtils'
 import { Grabbing } from '../icons/cursor/Grabbing'
+import { MouseEvent, Point, Tool, ToolEvent } from '@yomyer/paper'
 
 const ViewTool: React.FC = ({ children }) => {
     const { canvas } = useContext(EditorContext)
-    const [tool, setTool] = useState<paper.Tool>()
-    const downPoint = useRef<paper.Point>()
-    const offset = useRef<paper.Point>()
+    const [tool, setTool] = useState<Tool>()
+    const downPoint = useRef<Point>()
+    const offset = useRef<Point>()
 
     const wheelMove = useCallback(
         (e: WheelEvent) => {
-            if (tool && tool.activatedMain) {
+            if (tool && tool.isMain) {
                 const point = new canvas.Point(e.deltaX, e.deltaY).divide(2)
 
                 canvas.view.center = canvas.view.center.add(
@@ -38,11 +39,7 @@ const ViewTool: React.FC = ({ children }) => {
 
     const arrowMove = useCallback(
         (e: HotKeysEvent) => {
-            if (
-                tool &&
-                tool.activatedMain &&
-                !canvas.project.activedItems.length
-            ) {
+            if (tool && tool.isMain && !canvas.project.activeItems.length) {
                 const point = e.delta
                     .multiply((e.isPressed('shift') && 10) || 1)
                     .multiply(-5)
@@ -63,12 +60,12 @@ const ViewTool: React.FC = ({ children }) => {
     useEffect(() => {
         if (!tool) return
 
-        tool.onMouseDown = (e: paper.ToolEvent) => {
+        tool.onMouseDown = (e: ToolEvent) => {
             downPoint.current = e.point
             setGlobalCursor(Grabbing)
         }
 
-        tool.onMouseDrag = (e: paper.ToolEvent) => {
+        tool.onMouseDrag = (e: ToolEvent) => {
             canvas.view.center = downPoint.current
                 .subtract(e.point)
                 .add(canvas.view.center)
@@ -77,7 +74,7 @@ const ViewTool: React.FC = ({ children }) => {
             clearGlobalCursor(Grabbing)
         }
 
-        canvas.view.on('mousemove', (e: paper.MouseEvent) => {
+        canvas.view.on('mousemove', (e: MouseEvent) => {
             offset.current = e.point
         })
     }, [tool])
@@ -85,7 +82,7 @@ const ViewTool: React.FC = ({ children }) => {
     useHotkeys(
         'space',
         () => {
-            if (tool && tool.activatedMain) {
+            if (tool && tool.isMain) {
                 setCursor(Grab, canvas.view.element)
 
                 downPoint.current = offset.current
@@ -97,7 +94,7 @@ const ViewTool: React.FC = ({ children }) => {
             if (tool && tool.actived) {
                 clearGlobalCursor()
                 clearCursor(canvas.view.element)
-                tool.activateMain()
+                tool.activeMain()
             }
             return false
         },

@@ -1,3 +1,3 @@
-import paper from 'paper'
+import { Color as ColorPaper } from '@yomyer/paper'
 
-export class Color extends paper.Color {}
+export class Color extends ColorPaper {}

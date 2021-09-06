@@ -1,3 +1,4 @@
+import { Tool } from '@yomyer/paper'
 import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { useEventListener } from '../../uses/useEventListener'
 import { useHotkeys } from '../../uses/useHokeys'
@@ -12,7 +13,7 @@ type Props = {
 // https://jsfiddle.net/4va7kuwn/
 const ZoomTool: React.FC<Props> = ({ factor }) => {
     const { canvas } = useContext(EditorContext)
-    const [tool, setTool] = useState<paper.Tool>()
+    const [tool, setTool] = useState<Tool>()
     const [zoom, setZoom] = useState<number>()
 
     const wheelZoom = useCallback(
@@ -41,7 +42,7 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
 
                 setZoom(newZoom)
             } else {
-                tool.activateMain()
+                tool.activeMain()
             }
         },
         [tool]
@@ -53,7 +54,7 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
     }, [canvas])
 
     useEffect(() => {
-        if (!tool) return
+        // if (!tool) return
     }, [tool])
 
     useEffect(() => {
@@ -66,7 +67,7 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
         () => {},
         () => {
             if (tool && tool.actived) {
-                tool.activateMain()
+                tool.activeMain()
             }
             return false
         },

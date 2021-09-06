@@ -1,3 +1,4 @@
+import { Item, Path } from '@yomyer/paper'
 import React, { useContext, useEffect, useRef } from 'react'
 import { Player } from '../../../models'
 import { EditorContext } from '../../Yomtor'
@@ -19,14 +20,14 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
     life
 }) => {
     const { canvas } = useContext(EditorContext)
-    const highlights = useRef<paper.Item[]>([])
-    const selectedItems = useRef<paper.Item[]>([])
+    const highlights = useRef<Item[]>([])
+    const selectedItems = useRef<Item[]>([])
 
     useEffect(() => {
         if (player.id === owner) {
             const fireDispatch = (e: any) => {
                 onModified(
-                    e.items.map((item: paper.Path) => {
+                    e.items.map((item: Path) => {
                         return item.exportJSON()
                     })
                 )
@@ -39,7 +40,7 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
 
             canvas.on('selection:modified', (e: any) => {
                 onSelected(
-                    e.items.map((item: paper.Path) => {
+                    e.items.map((item: Path) => {
                         return item.uid
                     })
                 )
@@ -81,8 +82,8 @@ const PlayerTool: React.FC<PlayerToolProps> = ({
                 const item = canvas.project.getItem({ uid })
                 if (item) {
                     const hightlight =
-                        ((item as paper.Path).pathData &&
-                            new canvas.Path((item as paper.Path).pathData)) ||
+                        ((item as Path).pathData &&
+                            new canvas.Path((item as Path).pathData)) ||
                         item.clone()
 
                     hightlight.set({

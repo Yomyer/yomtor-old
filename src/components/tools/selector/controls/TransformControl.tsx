@@ -9,7 +9,8 @@ import React, {
 import { createCustomControl, CustomControlProps } from '../../../../utils'
 import {
     findCornerQuadrant,
-    rotateDelta
+    rotateDelta,
+    scaleWithRotate
 } from '../../../../utils/trigonometryUtils'
 import {
     clearCursor,
@@ -35,6 +36,16 @@ import { RotateSW } from '../../../icons/cursor/RotateSW'
 import { RotateW } from '../../../icons/cursor/RotateW'
 import { RotateNW } from '../../../icons/cursor/RotateNW'
 import { HotKeysEvent, useHotkeys } from '../../../../uses/useHokeys'
+import {
+    Group,
+    Item,
+    Point,
+    Selector,
+    Size,
+    Tool,
+    ToolEvent,
+    MouseEvent
+} from '@yomyer/paper'
 
 export const TransformControlTopLeft = createCustomControl({})
 export const TransformControlTopCenter = createCustomControl({
@@ -60,8 +71,8 @@ export const TransformControlBottomRight = createCustomControl({
 })
 
 type OptionalCustomControlPorps = {
-    group?: RefObject<paper.Group>
-    selector?: paper.Selector
+    group?: RefObject<Group>
+    selector?: Selector
 }
 
 const resizeCursors = [
@@ -91,31 +102,31 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     group,
     selector
 }) => {
-    const [tool, setTool] = useState<paper.Tool>()
+    const [tool, setTool] = useState<Tool>()
     const { canvas } = useContext(EditorContext)
     const props: CustomControlProps = { group, selector }
     const mode = useRef<'resize' | 'rotate'>('resize')
     const cursor = useRef<{
-        point?: paper.Point
+        point?: Point
         angle: number
-        corner?: paper.Item
+        corner?: Item
     }>(null)
-    const activeItems = useRef<paper.Item[]>([])
-    const activeHelpers = useRef<paper.Item[]>([])
+    const activeItems = useRef<Item[]>([])
+    const activeHelpers = useRef<Item[]>([])
 
-    const corner = useRef<paper.Item>(null)
+    const corner = useRef<Item>(null)
 
     const data = useRef<{
-        pivot: paper.Point
-        pivotOrigin: paper.Point
-        corner: paper.Point
-        handler: paper.Point
-        size: paper.Size
-        center: paper.Point
-        direction: paper.Point
+        pivot: Point
+        pivotOrigin: Point
+        corner: Point
+        handler: Point
+        size: Size
+        center: Point
+        direction: Point
         angle: number
-        delta?: paper.Point
-        point?: paper.Point
+        delta?: Point
+        point?: Point
     }>()
 
     const helperControl = () => {
@@ -143,11 +154,11 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         })
     }
 
-    const transform = (e: paper.ToolEvent, helper = true) => {
+    const transform = (e: ToolEvent, helper = true) => {
         mode.current === 'rotate' ? rotate(e, helper) : resize(e, helper)
     }
 
-    const resize = (e: paper.ToolEvent, helper = true) => {
+    const resize = (e: ToolEvent, helper = true) => {
         const current = data.current
 
         if (helper && e) {
@@ -190,12 +201,13 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             factor.y *= signy
         }
 
-        canvas.project.activedItems.forEach((item) => {
-            item.scaleWithRotate(
+        canvas.project.activeItems.forEach((item) => {
+            scaleWithRotate(
+                item,
                 factor,
                 current.pivot,
                 current.center,
-                canvas.project.activedItems.length === 1
+                canvas.project.activeItems.length === 1
                     ? undefined
                     : current.angle
             )
@@ -211,7 +223,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         canvas.fire('object:scaling', e)
     }
 
-    const rotate = (e: paper.ToolEvent, helper = true) => {
+    const rotate = (e: ToolEvent, helper = true) => {
         const current = data.current
 
         if (helper && e) {
@@ -226,12 +238,12 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             delta = (Math.round((delta - data.current.angle) / 15) * 15) % 360
         }
 
-        canvas.project.activedItems.forEach((item) => {
+        canvas.project.activeItems.forEach((item) => {
             item.rotate(delta)
         })
 
         canvas.setInfo(
-            `${canvas.project.selectorItem.angle % 181}º`,
+            `${canvas.project.itemSelector.angle % 181}º`,
             current.point
         )
 
@@ -248,7 +260,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
 
         const index = findCornerQuadrant(
             cursor.current,
-            canvas.project.selectorItem
+            canvas.project.itemSelector
         )
 
         let cursors = resizeCursors
@@ -261,26 +273,23 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
 
     const arrowTransform = useCallback(
         (e: HotKeysEvent) => {
-            if (
-                tool &&
-                tool.activatedMain &&
-                canvas.project.activedItems.length
-            ) {
+            if (tool && tool.isMain && canvas.project.activeItems.length) {
                 const point = e.delta
                     .multiply((e.isPressed('shift') && 10) || 1)
                     .multiply(-1)
 
-                const actives = canvas.project.activedItems.map((item) => {
+                const actives = canvas.project.activeItems.map((item) => {
                     return item.selector
                 })
 
-                actives.forEach((selector: paper.Selector) => {
+                actives.forEach((selector: Selector) => {
                     const size = new canvas.Point(selector.size)
                     const newSize = size.add(point)
 
                     const factor = size.divide(newSize)
 
-                    selector.item.scaleWithRotate(
+                    scaleWithRotate(
+                        selector.item,
                         factor,
                         selector.points.topLeft
                     )
@@ -300,21 +309,21 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
     useEffect(() => {
         if (!tool) return
 
-        tool.onMouseDrag = (e: paper.ToolEvent) => {
+        tool.onMouseDrag = (e: ToolEvent) => {
             data.current.point = e.point
 
             transform(e)
         }
 
-        tool.onKeyDown = (e: paper.ToolEvent) => {
+        tool.onKeyDown = (e: ToolEvent) => {
             transform(e)
         }
 
-        tool.onKeyUp = (e: paper.ToolEvent) => {
+        tool.onKeyUp = (e: ToolEvent) => {
             transform(e)
         }
 
-        tool.onMouseUp = (e: paper.ToolEvent) => {
+        tool.onMouseUp = (e: ToolEvent) => {
             canvas.project.deactivateAll()
             activeHelpers.current.forEach((item) => item.remove())
             activeItems.current.forEach((item) =>
@@ -324,7 +333,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             transform(e, false)
 
             clearGlobalCursor()
-            tool.activateMain()
+            tool.activeMain()
 
             if (e.item) {
                 const hitResult = e.item.hitTest(e.point, {
@@ -332,7 +341,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                     fill: true
                 })
                 if (hitResult && hitResult.item) {
-                    const event: paper.MouseEvent = e as any
+                    const event: MouseEvent = e as any
                     event.target = hitResult.item
                     hitResult.item.emit('mouseenter', event)
                 }
@@ -348,7 +357,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
             )
         }
 
-        canvas.view.on('mousemove', (e: paper.MouseEvent) => {
+        canvas.view.on('mousemove', (e: MouseEvent) => {
             corner.current = null
 
             if (e.target && e.target.data && e.target.data.isControl) {
@@ -361,10 +370,10 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         })
     }, [tool])
 
-    props.onMouseEnter = (e: paper.MouseEvent) => {
-        if (!tool.actived && tool.activatedMain) {
+    props.onMouseEnter = (e: MouseEvent) => {
+        if (!tool.actived && tool.isMain) {
             cursor.current = {
-                angle: canvas.project.selectorItem.selector.angle,
+                angle: canvas.project.itemSelector.selector.angle,
                 point: e.target.position,
                 corner: e.target
             }
@@ -380,19 +389,19 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         clearCursor()
     }
 
-    props.onMouseDown = (e: paper.MouseEvent) => {
-        if (!tool.activatedMain) return
+    props.onMouseDown = (e: MouseEvent) => {
+        if (!tool.isMain) return
 
         const cornerName = e.target.data.corner
-        const rect = canvas.project.selectorItem
-        activeItems.current = [...canvas.project.activedItems]
+        const rect = canvas.project.itemSelector
+        activeItems.current = [...canvas.project.activeItems]
 
         const angle = rect.selector.angle
 
         const center = rect.selector.bounds.center
-        const corner: paper.Point = rect.selector.bounds[cornerName]
-        const handler: paper.Point = rect.selector.points[cornerName]
-        const pivot: paper.Point =
+        const corner: Point = rect.selector.bounds[cornerName]
+        const handler: Point = rect.selector.points[cornerName]
+        const pivot: Point =
             rect.selector.bounds[canvas.OpostieCornersName[cornerName]]
         const pivotOrigin =
             rect.selector.points[canvas.OpostieCornersName[cornerName]]
@@ -422,7 +431,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         () => {
             if (!tool.actived) {
                 if (
-                    canvas.project.selectorItem &&
+                    canvas.project.itemSelector &&
                     corner.current &&
                     mode.current !== 'rotate'
                 ) {
@@ -431,7 +440,7 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                     cursor.current = {
                         point: corner.current.position,
                         corner: corner.current,
-                        angle: canvas.project.selectorItem.selector.angle
+                        angle: canvas.project.itemSelector.selector.angle
                     }
                     showCursor()
                 }

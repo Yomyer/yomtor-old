@@ -4,6 +4,8 @@ import { round } from '../../../utils/mathUtils'
 import { Block, Section } from '../../containers'
 import { NumericField } from '../../fields'
 import { EditorContext } from '../../Yomtor'
+import { Selector } from '@yomyer/paper'
+import { scaleWithRotate } from '../../../utils/trigonometryUtils'
 
 type Rect = {
     width: any
@@ -37,7 +39,7 @@ const RectProperties: React.FC = () => {
 
     const updateRect = useCallback(
         (toFix = 2) => {
-            const actives = canvas.project.activedItems.map((item) => {
+            const actives = canvas.project.activeItems.map((item) => {
                 return item.selector
             })
             const active = actives[0]
@@ -76,11 +78,11 @@ const RectProperties: React.FC = () => {
             const value = target.value
             const name = target.name
 
-            const actives = canvas.project.activedItems.map((item) => {
+            const actives = canvas.project.activeItems.map((item) => {
                 return item.selector
             })
 
-            actives.forEach((selector: paper.Selector) => {
+            actives.forEach((selector: Selector) => {
                 let alter = +value
 
                 if (e.type !== 'mouseup') {
@@ -112,7 +114,8 @@ const RectProperties: React.FC = () => {
                                     : 1
                             )
 
-                            selector.item.scaleWithRotate(
+                            scaleWithRotate(
+                                selector.item,
                                 factor,
                                 selector.points[
                                     name === 'width'
@@ -204,7 +207,6 @@ const RectProperties: React.FC = () => {
             return
         }
 
-        /*
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
         canvas.on('selection:cleared', () => updateRect())
@@ -214,7 +216,6 @@ const RectProperties: React.FC = () => {
         canvas.on('object:moved', () => updateRect(0))
         canvas.on('object:scaled', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
-        */
     }, [canvas])
 
     return (

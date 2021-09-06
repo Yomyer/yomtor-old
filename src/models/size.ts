@@ -1,3 +1,3 @@
-import paper from 'paper'
+import { Size as SizePaper } from '@yomyer/paper'
 
-export class Size extends paper.Size {}
+export class Size extends SizePaper {}

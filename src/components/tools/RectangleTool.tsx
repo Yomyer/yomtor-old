@@ -1,6 +1,6 @@
+import { KeyEvent, Path, Tool, ToolEvent } from '@yomyer/paper'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { EditorContext } from '../Yomtor'
-import paper from 'paper'
 
 type Props = {
     onInserMode?: (status: boolean) => void
@@ -9,8 +9,8 @@ type Props = {
 const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
     const { canvas } = useContext(EditorContext)
     const [insertMode, setInserMode] = useState(false)
-    const [tool, setTool] = useState<paper.Tool>()
-    const phantom = useRef<paper.Path.Rectangle>(null)
+    const [tool, setTool] = useState<Tool>()
+    const phantom = useRef<Path>(null)
 
     useEffect(() => {
         if (!canvas) return
@@ -26,22 +26,22 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
             tool.activate()
         } else if (tool) {
             if (phantom.current) phantom.current.remove()
-            tool.activateMain()
+            tool.activeMain()
         }
     }, [insertMode])
 
     useEffect(() => {
         if (!tool) return
 
-        tool.onMouseDrag = (e: paper.ToolEvent) => {
+        tool.onMouseDrag = (e: ToolEvent) => {
             if (phantom.current) phantom.current.remove()
 
-            phantom.current = new paper.Path.Rectangle({
+            phantom.current = new Path.Rectangle({
                 from: e.downPoint,
                 to: e.point,
                 strokeColor: 'black',
                 guide: true,
-                parent: canvas.guides
+                parent: canvas.guidesLayer
             })
 
             canvas.setInfo(
@@ -50,7 +50,7 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
             )
         }
 
-        tool.onMouseUp = (e: paper.ToolEvent) => {
+        tool.onMouseUp = (e: ToolEvent) => {
             setInserMode(false)
 
             if (phantom.current) {
@@ -72,7 +72,7 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
             canvas.clearInfo()
         }
 
-        tool.onKeyDown = (e: paper.KeyEvent) => {
+        tool.onKeyDown = (e: KeyEvent) => {
             if (e.key === 'escape') {
                 setInserMode(false)
             }
