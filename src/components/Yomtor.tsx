@@ -8,7 +8,7 @@ import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
 import { createTheme } from '../styles'
 import { YomtorTheme } from '../styles/createTheme'
-import paper from '@yomyer/paper'
+import paper from 'paper'
 
 type Props = {
     settings?: Settings

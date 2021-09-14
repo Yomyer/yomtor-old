@@ -14,6 +14,7 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
 
     useEffect(() => {
         if (!canvas) return
+        console.log(canvas)
         setTool(canvas.createTool('Rectangle'))
     }, [canvas])
 
