@@ -44,7 +44,8 @@ import {
     Size,
     Tool,
     ToolEvent,
-    MouseEvent
+    MouseEvent,
+    PaperScope
 } from '@yomyer/paper'
 
 export const TransformControlTopLeft = createCustomControl({})
@@ -402,9 +403,9 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
         const corner: Point = rect.selector.bounds[cornerName]
         const handler: Point = rect.selector.points[cornerName]
         const pivot: Point =
-            rect.selector.bounds[canvas.OpostieCornersName[cornerName]]
+            rect.selector.bounds[PaperScope.OpostieCornersName[cornerName]]
         const pivotOrigin =
-            rect.selector.points[canvas.OpostieCornersName[cornerName]]
+            rect.selector.points[PaperScope.OpostieCornersName[cornerName]]
         const size = rect.selector.size
         const direction = sign(normalize(corner.subtract(pivot)))
 

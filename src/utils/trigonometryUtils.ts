@@ -41,7 +41,7 @@ export const rotatePoint = (
 
     radians += Math.atan2(diff.y, diff.x)
 
-    return new paper.Point(
+    return new Point(
         center.x + distance * Math.cos(radians),
         center.y + distance * Math.sin(radians)
     )
@@ -82,7 +82,7 @@ export const rotateDelta = (point: Point, corner: Point, angle: number) => {
         angle
     )
 
-    const distance = new paper.Point(
+    const distance = new Point(
         Math.hypot(horizontalPoint.x - corner.x, horizontalPoint.y - corner.y),
         Math.hypot(verticalPoint.x - corner.x, verticalPoint.y - corner.y)
     ).multiply(sign(getDirection(point, corner)) as any)

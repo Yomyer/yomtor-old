@@ -57,7 +57,7 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
                 phantom.current.remove()
                 canvas.project.deactivateAll()
 
-                new canvas.Path.Rectangle({
+                const a = new canvas.Path.Rectangle({
                     from: e.downPoint,
                     to: e.point,
                     strokeColor: '#979797',
