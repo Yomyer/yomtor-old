@@ -136,6 +136,7 @@ const SelectorSelect = forwardRef<Group, { children: React.ReactNode }>(
 
                     setSelector(selector)
                 }
+
                 canvas.project.itemSelector = rect.current
                 ;(ref as MutableRefObject<Group>).current = group.current
             })

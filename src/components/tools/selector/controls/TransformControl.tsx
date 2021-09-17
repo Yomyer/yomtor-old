@@ -436,7 +436,6 @@ const TransformControl: React.FC<OptionalCustomControlPorps> = ({
                     corner.current &&
                     mode.current !== 'rotate'
                 ) {
-                    console.log('xD')
                     mode.current = 'rotate'
                     cursor.current = {
                         point: corner.current.position,

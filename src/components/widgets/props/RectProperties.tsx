@@ -16,64 +16,68 @@ type Rect = {
 }
 
 const RectProperties: React.FC = () => {
+    const defaults = {
+        multiple: {
+            width: true,
+            height: true,
+            left: true,
+            top: true,
+            angle: true
+        },
+        rect: {
+            width: '',
+            height: '',
+            left: '',
+            top: '',
+            angle: ''
+        }
+    }
     const { canvas } = useContext(EditorContext)
     const [{ multiple, rect }, setSettings] = useState<{
         multiple?: Rect
         rect?: Rect
-    }>({
-        multiple: {
-            width: false,
-            height: false,
-            left: false,
-            top: false,
-            angle: false
-        },
-        rect: {
-            width: 0,
-            height: 0,
-            left: 0,
-            top: 0,
-            angle: 0
-        }
-    })
+    }>(defaults)
 
     const updateRect = useCallback(
         (toFix = 2) => {
-            const actives = canvas.project.activeItems.map((item) => {
-                return item.selector
-            })
-            const active = actives[0]
+            const rects: Rect[] = canvas.project.activeItems.map((item) => {
+                const selector = item.selector
 
-            setSettings({
-                multiple: {
-                    width:
-                        uniq(actives.map((item) => item.size.width)).length !==
-                        1,
-                    height:
-                        uniq(actives.map((item) => item.size.height)).length !==
-                        1,
-                    left:
-                        uniq(actives.map((item) => item.bounds.topLeft.x))
-                            .length !== 1,
-                    top:
-                        uniq(actives.map((item) => item.bounds.topLeft.y))
-                            .length !== 1,
-                    angle: uniq(actives.map((item) => item.angle)).length !== 1
-                },
-                rect: {
-                    width: round(active?.size.width || 0, 2) || 0.5,
-                    height: round(active?.size.height || 0, 2) || 0.5,
-                    left: round(active?.bounds.topLeft.x || 0, toFix) || 0,
-                    top: round(active?.bounds.topLeft.y || 0, toFix) || 0,
-                    angle: round(active?.angle || 0, 0) || 0
+                return {
+                    width: round(selector.size.width || 0, 2) || 0.5,
+                    height: round(selector.size.height || 0, 2) || 0.5,
+                    left: round(selector.bounds.topLeft.x || 0, toFix) || 0,
+                    top: round(selector.bounds.topLeft.y || 0, toFix) || 0,
+                    angle: round(selector.angle || 0, 0) || 0
                 }
             })
+            const rect = rects[0]
+
+            if (rect) {
+                setSettings({
+                    multiple: {
+                        width:
+                            uniq(rects.map((rect) => rect.width)).length !== 1,
+                        height:
+                            uniq(rects.map((rect) => rect.height)).length !== 1,
+                        left: uniq(rects.map((rect) => rect.left)).length !== 1,
+                        top: uniq(rects.map((rect) => rect.top)).length !== 1,
+                        angle:
+                            uniq(rects.map((rect) => rect.angle)).length !== 1
+                    },
+                    rect
+                })
+            } else {
+                console.log('NOP')
+                setSettings(defaults)
+            }
         },
         [canvas]
     )
 
     const onUpdate = useCallback(
         (e) => {
+            console.log('update?')
             const target = e.target
             const value = target.value
             const name = target.name
@@ -81,7 +85,7 @@ const RectProperties: React.FC = () => {
             const actives = canvas.project.activeItems.map((item) => {
                 return item.selector
             })
-
+            console.log(actives)
             actives.forEach((selector: Selector) => {
                 let alter = +value
 
@@ -128,10 +132,10 @@ const RectProperties: React.FC = () => {
                         case 'left':
                         case 'top':
                             if (e.type !== 'keypress') {
-                                if (multiple.width && name === 'left') {
+                                if (multiple.left && name === 'left') {
                                     alter += selector.bounds.topLeft.x
                                 }
-                                if (multiple.height && name === 'top') {
+                                if (multiple.top && name === 'top') {
                                     alter += selector.bounds.topLeft.y
                                 }
                             }
@@ -154,7 +158,6 @@ const RectProperties: React.FC = () => {
                 }
             })
 
-            console.log(e.type)
             if (name === 'angle') {
                 canvas.fire(
                     ['keypress', 'mouseup'].includes(e.type)
@@ -206,10 +209,9 @@ const RectProperties: React.FC = () => {
         if (!canvas) {
             return
         }
-
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
-        canvas.on('selection:cleared', () => updateRect())
+        // canvas.on('selection:cleared', () => updateRect())
         canvas.on('object:moving', () => updateRect(0))
         canvas.on('object:scaling', () => updateRect(0))
         canvas.on('object:rotating', () => updateRect())

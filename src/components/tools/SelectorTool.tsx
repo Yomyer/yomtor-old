@@ -220,7 +220,6 @@ const SelectorTool: React.FC = ({ children }) => {
                 }
 
                 const item = canvas.project.getItemByPoint(e.downPoint)
-
                 const updated = canvas.project.activeItems.length
                     ? 'updated'
                     : 'created'
@@ -256,8 +255,6 @@ const SelectorTool: React.FC = ({ children }) => {
                 if (!item) {
                     mode.current = 'select'
                 }
-
-                console.log(item)
             }
         }
 
