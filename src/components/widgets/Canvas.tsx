@@ -41,9 +41,14 @@ const Canvas: React.FC<Props> = ({ children }) => {
     return (
         <div className={styles.root} ref={wrapperRef}>
             <canvas
+                tabIndex={0}
                 ref={canvasRef}
                 className={styles.canvas}
                 data-paper-resize='true'
+                onMouseDown={() => {
+                    canvasRef.current.focus()
+                    canvasRef.current.blur()
+                }}
             />
             <div className={styles.tools}>{children}</div>
         </div>

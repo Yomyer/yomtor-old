@@ -27,7 +27,7 @@ const SelectorSelect = forwardRef<Group, { children: React.ReactNode }>(
             if (!canvas) return
 
             clone.current = new canvas.Group({
-                guide: true
+                insert: false
             })
 
             canvas.view.on('zoom', () => {
@@ -36,8 +36,9 @@ const SelectorSelect = forwardRef<Group, { children: React.ReactNode }>(
 
             canvas.view.on('frame', () => {
                 if (
-                    !isEqual(actives.current, canvas.project.activeItems) &&
-                    canvas.mainTool.actived
+                    (!isEqual(actives.current, canvas.project.activeItems) &&
+                        canvas.mainTool === canvas.tool) ||
+                    (group.current && canvas.project.insertMode)
                 ) {
                     activedRects.current = []
                     group.current && group.current.remove()
@@ -58,11 +59,10 @@ const SelectorSelect = forwardRef<Group, { children: React.ReactNode }>(
 
                     clone.current.addChildren(
                         canvas.project.activeItems.map((item) => {
-                            return item.clone({ insert: false })
+                            return item.clone({ insert: false, keep: true })
                         })
                     )
                     const selector = clone.current.selector
-
                     clone.current.removeChildren()
 
                     if (!group.current) {

@@ -16,18 +16,26 @@ import {
     setCursor
 } from '../../utils/cursorUtils'
 import { Grabbing } from '../icons/cursor/Grabbing'
-import { MouseEvent, Point, Tool, ToolEvent } from '@yomyer/paper'
+import { MouseEvent, Point, Rectangle, Tool, ToolEvent } from '@yomyer/paper'
 
-const ViewTool: React.FC = ({ children }) => {
+type Props = {
+    factor?: number
+}
+
+const ViewTool: React.FC<Props> = ({ children, factor }) => {
     const { canvas } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
-    const downPoint = useRef<Point>()
     const offset = useRef<Point>()
+    const scrollDragDirection = useRef<Point>()
+    const dragEvent = useRef<ToolEvent>()
+    const downPoint = useRef<Point>()
 
     const wheelMove = useCallback(
         (e: WheelEvent) => {
-            if (tool && tool.isMain) {
-                const point = new canvas.Point(e.deltaX, e.deltaY).divide(2)
+            if (tool && tool.mainActived) {
+                const point = new canvas.Point(e.deltaX, e.deltaY).divide(
+                    factor
+                )
 
                 canvas.view.center = canvas.view.center.add(
                     point.divide(canvas.view.zoom)
@@ -39,10 +47,14 @@ const ViewTool: React.FC = ({ children }) => {
 
     const arrowMove = useCallback(
         (e: HotKeysEvent) => {
-            if (tool && tool.isMain && !canvas.project.activeItems.length) {
+            if (
+                tool &&
+                tool.mainActived &&
+                !canvas.project.activeItems.length
+            ) {
                 const point = e.delta
                     .multiply((e.isPressed('shift') && 10) || 1)
-                    .multiply(-5)
+                    .multiply(-factor)
 
                 canvas.view.center = canvas.view.center.add(
                     point.divide(canvas.view.zoom)
@@ -55,37 +67,92 @@ const ViewTool: React.FC = ({ children }) => {
     useEffect(() => {
         if (!canvas) return
         setTool(canvas.createTool('View'))
+
+        canvas.view.on('mousemove', (e: MouseEvent) => {
+            offset.current = e.point
+        })
+
+        canvas.view.on('mousedrag', (e: MouseEvent) => {
+            const rect = new Rectangle(new Point(0, 0), canvas.view.viewSize)
+            const point = canvas.view.projectToView(e.point)
+            const inside = rect.contains(point)
+
+            dragEvent.current = (e as unknown) as ToolEvent
+            dragEvent.current.downPoint = downPoint.current
+
+            scrollDragDirection.current = null
+
+            if (!inside) {
+                scrollDragDirection.current = new Point(
+                    point.x < 0 ? -1 : point.x > rect.width ? 1 : 0,
+                    point.y < 0 ? -1 : point.y > rect.height ? 1 : 0
+                )
+
+                canvas.view.center = canvas.view.center.add(
+                    scrollDragDirection.current
+                        .multiply(factor)
+                        .divide(canvas.view.zoom)
+                )
+            }
+        })
+
+        canvas.view.on('mouseup', () => {
+            scrollDragDirection.current = null
+        })
+
+        canvas.view.on('mousedown', (e: ToolEvent) => {
+            downPoint.current = e.point
+        })
+
+        canvas.view.on('frame', (e: any) => {
+            if (!(e.count % 1)) {
+                setTimeout(() => {
+                    if (scrollDragDirection.current) {
+                        const delta = scrollDragDirection.current
+                            .multiply(factor)
+                            .divide(canvas.view.zoom)
+                        const point = dragEvent.current.point.add(delta)
+
+                        dragEvent.current.point = point
+                        dragEvent.current.delta = delta
+
+                        canvas.project.removeOn('mousedrag')
+
+                        canvas.view.emit('mousedrag', dragEvent.current)
+
+                        canvas.view.handleMouseEvent(
+                            'mousedrag',
+                            dragEvent.current,
+                            point
+                        )
+                    }
+                })
+            }
+        })
     }, [canvas])
 
     useEffect(() => {
         if (!tool) return
 
-        tool.onMouseDown = (e: ToolEvent) => {
-            downPoint.current = e.point
+        tool.onMouseDown = () => {
             setGlobalCursor(Grabbing)
         }
 
         tool.onMouseDrag = (e: ToolEvent) => {
-            canvas.view.center = downPoint.current
-                .subtract(e.point)
-                .add(canvas.view.center)
+            const offset = e.downPoint.subtract(e.point)
+            canvas.view.center = canvas.view.center.add(offset)
         }
+
         tool.onMouseUp = () => {
             clearGlobalCursor(Grabbing)
         }
-
-        canvas.view.on('mousemove', (e: MouseEvent) => {
-            offset.current = e.point
-        })
     }, [tool])
 
     useHotkeys(
         'space',
         () => {
-            if (tool && tool.isMain) {
+            if (tool && tool.mainActived) {
                 setCursor(Grab, canvas.view.element)
-
-                downPoint.current = offset.current
                 tool.activate()
             }
             return false
@@ -118,6 +185,10 @@ const ViewTool: React.FC = ({ children }) => {
     )
 
     return <>{children}</>
+}
+
+ViewTool.defaultProps = {
+    factor: 5
 }
 
 export default ViewTool

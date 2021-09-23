@@ -1,16 +1,29 @@
 import { KeyEvent, Path, Tool, ToolEvent } from '@yomyer/paper'
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, {
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+    useCallback
+} from 'react'
+import { useHotkeys } from '../../uses/useHokeys'
 import { EditorContext } from '../Yomtor'
+import { round } from '../../utils/mathUtils'
 
 type Props = {
     onInserMode?: (status: boolean) => void
+    hotKey?: string
 }
 
-const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
-    const { canvas } = useContext(EditorContext)
+const RectangleTool: React.FC<Props> = ({ children, onInserMode, hotKey }) => {
+    const { canvas, theme } = useContext(EditorContext)
     const [insertMode, setInserMode] = useState(false)
     const [tool, setTool] = useState<Tool>()
     const phantom = useRef<Path>(null)
+
+    const onClick = useCallback(() => {
+        setInserMode(true)
+    }, [canvas])
 
     useEffect(() => {
         if (!canvas) return
@@ -37,9 +50,10 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
             if (phantom.current) phantom.current.remove()
 
             phantom.current = new Path.Rectangle({
-                from: e.downPoint,
-                to: e.point,
-                strokeColor: 'black',
+                from: round(e.downPoint),
+                to: round(e.point),
+                strokeColor: theme.palette.path.default.border,
+                strokeWidth: 1 / canvas.view.zoom,
                 guide: true,
                 parent: canvas.guidesLayer
             })
@@ -57,16 +71,14 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
                 phantom.current.remove()
                 canvas.project.deactivateAll()
 
-                const a = new canvas.Path.Rectangle({
-                    from: e.downPoint,
-                    to: e.point,
-                    strokeColor: '#979797',
-                    fillColor: '#D8D8D8',
+                new canvas.Path.Rectangle({
+                    from: round(e.downPoint),
+                    to: round(e.point),
+                    strokeColor: theme.palette.path.default.border,
+                    fillColor: theme.palette.path.default.background,
                     name: 'Rectangle',
                     actived: true
                 })
-
-                canvas.fire('object:created', e)
             }
 
             canvas.clearInfo()
@@ -79,15 +91,22 @@ const RectangleTool: React.FC<Props> = ({ children, onInserMode }) => {
         }
     }, [tool])
 
-    const onClick = () => {
-        setInserMode(true)
-    }
+    useHotkeys(
+        hotKey,
+        () => {
+            if (tool && tool.mainActived) {
+                setInserMode(true)
+            }
+        },
+        [tool]
+    )
 
     return <span onClick={onClick}>{children}</span>
 }
 
 RectangleTool.defaultProps = {
-    onInserMode: () => {}
+    onInserMode: () => {},
+    hotKey: 'r'
 }
 
 export default RectangleTool

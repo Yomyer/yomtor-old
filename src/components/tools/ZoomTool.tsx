@@ -2,6 +2,7 @@ import { Tool } from '@yomyer/paper'
 import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { useEventListener } from '../../uses/useEventListener'
 import { useHotkeys } from '../../uses/useHokeys'
+import Button from '../override/Button'
 import { EditorContext } from '../Yomtor'
 
 type Props = {
@@ -30,8 +31,9 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
                     new canvas.Point(e.offsetX, e.offsetY)
                 )
 
+                const reverse = 1 - 1 / factor
                 const newZoom =
-                    e.deltaY > 0 ? oldZoom * factor : oldZoom / factor
+                    e.deltaY > 0 ? oldZoom * reverse : oldZoom / reverse
                 canvas.view.zoom = newZoom
 
                 canvas.view.center = canvas.view.center.add(
@@ -84,13 +86,13 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
 
     return (
         <>
-            <button>{zoom}</button>
+            <Button>{zoom}</Button>
         </>
     )
 }
 
 ZoomTool.defaultProps = {
-    factor: 1.5
+    factor: 8
 }
 
 export default ZoomTool

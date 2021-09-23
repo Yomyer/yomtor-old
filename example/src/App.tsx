@@ -19,7 +19,8 @@ import {
     Player,
     Color,
     colorWord,
-    ViewTool
+    ViewTool,
+    SnapTool
 } from 'yomtor'
 
 const ENDPOINT = 'http://localhost:4000'
@@ -153,6 +154,7 @@ const App = () => {
                         </SelectorTool>
                         <CursorInfoTool />
                         <ViewTool />
+                        <SnapTool />
                         <PlayersTool
                             life
                             players={players}

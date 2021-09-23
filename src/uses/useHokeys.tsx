@@ -187,7 +187,10 @@ export function useHotkeys<T extends Element>(
                 ref.current === null ||
                 document.activeElement === ref.current
             ) {
-                if (keyboardEvent.type === 'keydown') {
+                if (
+                    keyboardEvent.type === 'keydown' &&
+                    typeof callbackDown === 'function'
+                ) {
                     if (
                         !modifier.length ||
                         intersectionWith(

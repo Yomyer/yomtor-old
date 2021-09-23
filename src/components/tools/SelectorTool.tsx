@@ -29,6 +29,8 @@ const SelectorTool: React.FC = ({ children }) => {
     const clonedItems = useRef<Item[]>([])
     const selectRect = useRef<Path>(null)
     const beforePositions = useRef<Point[]>([])
+    const moved = useRef<boolean>(false)
+    const selectItems = useRef<Item[]>(null)
 
     const isActiveItemsUpdated = (): boolean => {
         return isEqual(
@@ -51,7 +53,7 @@ const SelectorTool: React.FC = ({ children }) => {
     const cloneController = () => {
         if (mode.current === 'clone') {
             if (!clonedItems.current.length) {
-                activedItems.current = [...canvas.project.activeItems]
+                updateAtiveItems()
                 clonedItems.current = canvas.project.activeItems.map((item) =>
                     item.clone()
                 )
@@ -111,12 +113,12 @@ const SelectorTool: React.FC = ({ children }) => {
                     return !item.guide && !['Layer'].includes(item.className)
                 }
             }
+
             if (selectRect.current.layer) {
                 match[e.modifiers.alt ? 'inside' : 'overlapping'] =
                     selectRect.current.bounds
 
                 const items = canvas.project.getItems(match)
-
                 canvas.project.deactivateAll()
 
                 const deactives = intersectionWith(
@@ -130,6 +132,7 @@ const SelectorTool: React.FC = ({ children }) => {
                     deactives,
                     isEqual
                 )
+
                 deactives.forEach((item) => (item.actived = false))
                 actives.forEach((item) => (item.actived = true))
 
@@ -137,6 +140,35 @@ const SelectorTool: React.FC = ({ children }) => {
                     up: true,
                     drag: true
                 })
+
+                if (e.modifiers.shift && selectItems.current === null) {
+                    selectItems.current = [...canvas.project.activeItems]
+                }
+
+                if (
+                    !isEqual(
+                        (selectItems.current || []).map((item) => item.uid),
+                        canvas.project.activeItems.map((item) => item.uid)
+                    )
+                ) {
+                    let action = 'updated'
+
+                    if (!canvas.project.activeItems.length) {
+                        action = 'cleared'
+                    }
+
+                    if (
+                        !(selectItems.current || []).length &&
+                        !deactives.length
+                    ) {
+                        action = 'created'
+                    }
+
+                    canvas.fire(`selection:${action}`, {
+                        ...{ items: actives }
+                    })
+                }
+                selectItems.current = [...canvas.project.activeItems]
             }
         }
     }
@@ -148,6 +180,7 @@ const SelectorTool: React.FC = ({ children }) => {
 
             if (mode.current === 'move') {
                 canvas.fire('object:moving', e)
+                moved.current = true
             }
         },
         [canvas]
@@ -157,7 +190,7 @@ const SelectorTool: React.FC = ({ children }) => {
         (e: HotKeysEvent) => {
             if (
                 tool &&
-                tool.isMain &&
+                tool.mainActived &&
                 canvas.project.activeItems.length &&
                 !e.isPressed('cmd')
             ) {
@@ -192,6 +225,8 @@ const SelectorTool: React.FC = ({ children }) => {
             mode.current = ['move', 'clone'].includes(beforeMode)
                 ? beforeMode
                 : 'none'
+
+            tool.paused = false
         }
 
         tool.onDeactivate = () => {
@@ -199,7 +234,9 @@ const SelectorTool: React.FC = ({ children }) => {
             mode.current = 'none'
             cloneController()
 
-            updateAtiveItems()
+            if (hightlight.current) {
+                hightlight.current.remove()
+            }
         }
 
         tool.onMouseDown = (e: ToolEvent) => {
@@ -229,6 +266,8 @@ const SelectorTool: React.FC = ({ children }) => {
                 }
 
                 if (item) {
+                    tool.paused = true
+
                     if (!item.actived) {
                         item.actived = true
                     } else if (e.modifiers.shift) {
@@ -304,13 +343,18 @@ const SelectorTool: React.FC = ({ children }) => {
         tool.onMouseUp = (e: ToolEvent) => {
             clonedItems.current = []
             beforePositions.current = []
+            selectItems.current = null
 
-            canvas.fire('selection:modified', e)
-            canvas.fire('object:moved', e)
+            if (moved.current) {
+                canvas.fire('object:moved', e)
+                moved.current = false
+            }
 
             mode.current = 'select'
 
             updateAtiveItems()
+
+            tool.paused = false
         }
 
         tool.onKeyDown = (e: KeyEvent) => {

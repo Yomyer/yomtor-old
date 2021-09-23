@@ -4,7 +4,7 @@ import { round } from '../../../utils/mathUtils'
 import { Block, Section } from '../../containers'
 import { NumericField } from '../../fields'
 import { EditorContext } from '../../Yomtor'
-import { Selector } from '@yomyer/paper'
+import { Selector, Tool } from '@yomyer/paper'
 import { scaleWithRotate } from '../../../utils/trigonometryUtils'
 
 type Rect = {
@@ -18,11 +18,11 @@ type Rect = {
 const RectProperties: React.FC = () => {
     const defaults = {
         multiple: {
-            width: true,
-            height: true,
-            left: true,
-            top: true,
-            angle: true
+            width: false,
+            height: false,
+            left: false,
+            top: false,
+            angle: false
         },
         rect: {
             width: '',
@@ -33,6 +33,9 @@ const RectProperties: React.FC = () => {
         }
     }
     const { canvas } = useContext(EditorContext)
+    const [tool, setTool] = useState<Tool>()
+    const [actived, setActived] = useState<boolean>(false)
+
     const [{ multiple, rect }, setSettings] = useState<{
         multiple?: Rect
         rect?: Rect
@@ -53,6 +56,8 @@ const RectProperties: React.FC = () => {
             })
             const rect = rects[0]
 
+            setActived(!!rects.length)
+
             if (rect) {
                 setSettings({
                     multiple: {
@@ -68,7 +73,6 @@ const RectProperties: React.FC = () => {
                     rect
                 })
             } else {
-                console.log('NOP')
                 setSettings(defaults)
             }
         },
@@ -77,7 +81,6 @@ const RectProperties: React.FC = () => {
 
     const onUpdate = useCallback(
         (e) => {
-            console.log('update?')
             const target = e.target
             const value = target.value
             const name = target.name
@@ -85,7 +88,6 @@ const RectProperties: React.FC = () => {
             const actives = canvas.project.activeItems.map((item) => {
                 return item.selector
             })
-            console.log(actives)
             actives.forEach((selector: Selector) => {
                 let alter = +value
 
@@ -209,43 +211,60 @@ const RectProperties: React.FC = () => {
         if (!canvas) {
             return
         }
+
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
-        // canvas.on('selection:cleared', () => updateRect())
+        canvas.on('selection:cleared', () => updateRect())
         canvas.on('object:moving', () => updateRect(0))
         canvas.on('object:scaling', () => updateRect(0))
         canvas.on('object:rotating', () => updateRect())
         canvas.on('object:moved', () => updateRect(0))
         canvas.on('object:scaled', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
+
+        setTool(canvas.createTool('RectProperties'))
+        /*
+        canvas.on('selection:updated', () => console.log('selection:updated'))
+        canvas.on('selection:created', () => console.log('selection:created'))
+        canvas.on('selection:cleared', () => console.log('selection:cleared'))
+        canvas.on('object:moving', () => console.log('object:moving'))
+        canvas.on('object:scaling', () => console.log('object:scaling'))
+        canvas.on('object:rotating', () => console.log('object:rotating'))
+        canvas.on('object:moved', () => console.log('object:moved'))
+        canvas.on('object:moving', () => console.log('object:moving'))
+        */
     }, [canvas])
 
+    const props = {
+        onKeyDown: () => tool.activate(),
+        onKeyUp: () => tool.activeMain(),
+        onUpdate: onUpdate,
+        onChange: onChange
+    }
+
     return (
-        <Section>
+        <Section actived={actived}>
             <Block>
                 <NumericField
                     name='left'
                     suffix='X'
                     value={rect.left.toString()}
-                    onUpdate={onUpdate}
-                    onChange={onChange}
                     multiple={multiple.left}
+                    {...props}
                 />
                 <NumericField
                     name='top'
                     suffix='Y'
                     value={rect.top.toString()}
-                    onUpdate={onUpdate}
-                    onChange={onChange}
                     multiple={multiple.top}
+                    {...props}
                 />
                 <NumericField
                     name='angle'
                     suffix='º'
                     value={rect.angle.toString()}
-                    onUpdate={onUpdate}
-                    onChange={onChange}
                     multiple={multiple.angle}
+                    {...props}
                 />
             </Block>
             <Block>
@@ -255,9 +274,8 @@ const RectProperties: React.FC = () => {
                     suffix='W'
                     min={0.5}
                     value={rect.width.toString()}
-                    onUpdate={onUpdate}
-                    onChange={onChange}
                     multiple={multiple.width}
+                    {...props}
                 />
                 <NumericField
                     name='height'
@@ -265,9 +283,8 @@ const RectProperties: React.FC = () => {
                     suffix='H'
                     min={0.5}
                     value={rect.height.toString()}
-                    onUpdate={onUpdate}
-                    onChange={onChange}
                     multiple={multiple.height}
+                    {...props}
                 />
             </Block>
         </Section>

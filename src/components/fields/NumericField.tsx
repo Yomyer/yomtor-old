@@ -129,6 +129,7 @@ const NumericField: React.FC<Props> = ({
 
     const input = useRef<HTMLInputElement>()
     const styles = useStyles({ theme, ...{ showArrows, focused } })
+    const origin = { ...props }
 
     if (!mutipleText) mutipleText = 'Multiple'
 
@@ -171,23 +172,27 @@ const NumericField: React.FC<Props> = ({
     props.onBlur = (e: any) => {
         update(e)
         setFocused(false)
+        origin.onBlur && origin.onBlur(e)
     }
 
     props.onFocus = (e) => {
         setDefatulValue(e.target.value)
         setFocused(true)
+        origin.onFocus && origin.onFocus(e)
     }
 
     props.onInput = (e: any) => {
         if (isValid(validatorProps, e.target.value)) {
             setDefatulValue(e.target.value)
         }
+        origin.onInput && origin.onInput(e)
     }
 
     props.onKeyPress = (e) => {
         if (e.key === 'Enter') {
             update(e)
         }
+        origin.onKeyPress && origin.onKeyPress(e)
     }
 
     props.onKeyDown = (e) => {
@@ -195,6 +200,7 @@ const NumericField: React.FC<Props> = ({
             update(e, e.key === 'ArrowUp' ? 1 : -1)
             e.preventDefault()
         }
+        origin.onKeyDown && origin.onKeyDown(e)
     }
 
     const onDrag = (e: any, ui: any) => {
@@ -203,6 +209,7 @@ const NumericField: React.FC<Props> = ({
         e.target.name = props.name
 
         update(e, ui.deltaX)
+        input.current.focus()
     }
 
     const onDragStart = () => {

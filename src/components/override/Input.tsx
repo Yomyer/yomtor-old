@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, MutableRefObject, useRef } from 'react'
 import { createUseStyles } from 'react-jss'
 
 type Props = React.DetailedHTMLProps<
@@ -19,8 +19,36 @@ const useStyles = createUseStyles({
 
 const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
     const { root } = useStyles()
+    const input = useRef<HTMLInputElement>()
 
-    return <input ref={ref} className={root} autoComplete='off' {...props} />
+    /*
+    useEffect(() => {
+        const listener = (_e: MouseEvent) => {
+            input.current.blur()
+        }
+
+        window.addEventListener('click', listener)
+        return () => {
+            window.removeEventListener('click', listener)
+        }
+    }, [])
+    */
+
+    return (
+        <input
+            ref={(node) => {
+                input.current = node
+                if (typeof ref === 'function') {
+                    ref(node)
+                } else if (ref) {
+                    ;(ref as MutableRefObject<HTMLDivElement>).current = node
+                }
+            }}
+            className={root}
+            autoComplete='off'
+            {...props}
+        />
+    )
 })
 
 Input.defaultProps = {

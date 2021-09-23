@@ -1,7 +1,14 @@
+import { isUndefined } from 'lodash'
 import React from 'react'
 import { createUseStyles } from 'react-jss'
+import { YomtorTheme } from '../../styles/createTheme'
 
-const useStyles = createUseStyles({
+type Props = {
+    actived?: boolean
+    visible?: boolean
+}
+
+const useStyles = createUseStyles<'block', Props, YomtorTheme>({
     block: {
         width: '100%',
         height: 'inherit',
@@ -20,14 +27,20 @@ const useStyles = createUseStyles({
         },
         '& > *:last-child': {
             marginRight: '0'
-        }
+        },
+        pointerEvents: (props) =>
+            !isUndefined(props.actived) && (props.actived ? 'all' : 'none')
     }
 })
 
-const Block: React.FC = ({ children }) => {
-    const { block } = useStyles()
+const Block: React.FC<Props> = ({ children, visible, ...props }) => {
+    const { block } = useStyles({ ...props })
 
-    return <div className={block}>{children}</div>
+    return <>{visible ? <div className={block}>{children}</div> : null}</>
+}
+
+Block.defaultProps = {
+    visible: true
 }
 
 export default Block

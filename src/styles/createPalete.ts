@@ -44,24 +44,31 @@ export type TypeText = {
 }
 
 export type TypeCanvas = {
-    info: {
-        color: string
-        background: string
+    info?: {
+        color?: string
+        background?: string
     }
-    selected: {
-        border: string
+    selected?: {
+        border?: string
     }
-    selector: {
-        background: string
-        border: string
+    selector?: {
+        background?: string
+        border?: string
     }
-    corners: {
-        background: string
-        border: string
+    corners?: {
+        background?: string
+        border?: string
     }
-    highlight: {
-        background: string
-        border: string
+    highlight?: {
+        background?: string
+        border?: string
+    }
+}
+
+export type TypePath = {
+    default?: {
+        background?: string
+        border?: string
     }
 }
 
@@ -80,6 +87,7 @@ export type Palette = {
     action?: TypeAction
     canvas?: TypeCanvas
     background?: TypeBackground
+    path?: TypePath
 }
 
 export type Color = {
@@ -159,6 +167,13 @@ export const canvas: TypeCanvas = {
     highlight: {
         background: 'rgba(0, 142, 252, 0.1)',
         border: 'rgba(0, 142, 252, 1)'
+    }
+}
+
+export const path: TypePath = {
+    default: {
+        background: '#D8D8D8',
+        border: '#979797'
     }
 }
 
@@ -267,6 +282,7 @@ export default function createPalette(palette: Palette): Palette {
             augmentColor,
             tonalOffset,
             canvas,
+            path,
             ...modes[mode]
         },
         other
