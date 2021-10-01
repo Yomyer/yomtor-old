@@ -1,11 +1,8 @@
 import React from 'react'
 import { createUseStyles } from 'react-jss'
+import { IconProps } from '../..'
 
-type Props = {
-    rotate?: number
-}
-
-const useStyles = createUseStyles<'root', Props>(
+const useStyles = createUseStyles<'root', IconProps>(
     {
         root: {
             color: 'inherit',
@@ -23,7 +20,7 @@ const useStyles = createUseStyles<'root', Props>(
     { link: false }
 )
 
-const SvgIcon: React.FC<Props> = ({ children, ...props }) => {
+const SvgIcon: React.FC<IconProps> = ({ children, ...props }) => {
     const classes = useStyles(props)
 
     return (

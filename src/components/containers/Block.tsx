@@ -6,10 +6,13 @@ import { YomtorTheme } from '../../styles/createTheme'
 type Props = {
     actived?: boolean
     visible?: boolean
+    gap?: number
+    margin?: number
+    padding?: number
 }
 
-const useStyles = createUseStyles<'block', Props, YomtorTheme>({
-    block: {
+const useStyles = createUseStyles<'root', Props, YomtorTheme>({
+    root: {
         width: '100%',
         height: 'inherit',
         minHeight: 'inherit',
@@ -19,11 +22,11 @@ const useStyles = createUseStyles<'block', Props, YomtorTheme>({
         placeContent: 'center space-between',
         alignItems: 'center',
         flexDirection: 'row',
-        padding: '0 10px',
-        margin: '10px 0',
+        padding: (props) => `0 ${props.padding}px`,
+        margin: (props) => `${props.margin}px 0`,
         '& > *': {
             width: '100%',
-            marginRight: '10px'
+            marginRight: (props) => props.gap
         },
         '& > *:last-child': {
             marginRight: '0'
@@ -34,13 +37,16 @@ const useStyles = createUseStyles<'block', Props, YomtorTheme>({
 })
 
 const Block: React.FC<Props> = ({ children, visible, ...props }) => {
-    const { block } = useStyles({ ...props })
+    const { root } = useStyles({ ...props })
 
-    return <>{visible ? <div className={block}>{children}</div> : null}</>
+    return <>{visible ? <div className={root}>{children}</div> : null}</>
 }
 
 Block.defaultProps = {
-    visible: true
+    visible: true,
+    gap: 10,
+    margin: 10,
+    padding: 10
 }
 
 export default Block

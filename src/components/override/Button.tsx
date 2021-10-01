@@ -10,7 +10,17 @@ const useStyles = createUseStyles({
     root: {
         border: 'none',
         width: '100%',
-        outline: 'none'
+        outline: 'none',
+        background: 'none',
+        color: 'inherit',
+        userSelect: 'none',
+        cursor: 'inherit',
+        minHeight: 'inherit',
+        height: 'inherit',
+        display: 'flex',
+        justifyContent: 'center',
+        alignContent: 'center',
+        alignItems: 'center'
     }
 })
 

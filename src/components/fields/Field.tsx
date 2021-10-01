@@ -19,10 +19,10 @@ const Field = <T extends object>({
     children
 }: Props<T>) => {
     return (
-        <div>
+        <>
             {label && labelPosition === 'above' ? <label>{label}</label> : ''}
             {children}
-        </div>
+        </>
     )
 }
 
