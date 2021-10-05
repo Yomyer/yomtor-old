@@ -368,8 +368,9 @@ const SelectorTool: React.FC = ({ children }) => {
             }
 
             if (['delete', 'backspace'].includes(e.key)) {
+                const items = canvas.project.activeItems
                 canvas.fire('object:deleted', {
-                    items: canvas.project.activeItems.map((item) => {
+                    items: items.map((item) => {
                         item.data.deleted = true
                         return item
                     })
@@ -377,6 +378,8 @@ const SelectorTool: React.FC = ({ children }) => {
 
                 canvas.project.activeItems.forEach((item) => item.remove())
                 canvas.project.deactivateAll()
+
+                canvas.fire('selection:cleared', { items })
             }
         }
 

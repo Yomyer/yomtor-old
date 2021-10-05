@@ -215,12 +215,15 @@ const RectProperties: React.FC = () => {
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
         canvas.on('selection:cleared', () => updateRect())
-        canvas.on('object:moving', () => updateRect(0))
-        canvas.on('object:scaling', () => updateRect(0))
-        canvas.on('object:rotating', () => updateRect())
         canvas.on('object:moved', () => updateRect(0))
         canvas.on('object:scaled', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
+
+        /*
+        canvas.on('object:moving', () => updateRect(0))
+        canvas.on('object:scaling', () => updateRect(0))
+        canvas.on('object:rotating', () => updateRect())
+        */
 
         setTool(canvas.createTool('RectProperties'))
         /*

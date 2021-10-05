@@ -63,6 +63,7 @@ export type TypeCanvas = {
         background?: string
         border?: string
     }
+    background?: string
 }
 
 export type TypePath = {
@@ -118,6 +119,9 @@ export const light: Palette = {
         focus: 'rgba(0, 0, 0, 0.12)',
         focusOpacity: 0.12,
         activatedOpacity: 0.12
+    },
+    canvas: {
+        background: '#E5E5E5'
     }
 }
 
@@ -145,6 +149,9 @@ export const dark: Palette = {
         focus: 'rgba(255, 255, 255, 0.12)',
         focusOpacity: 0.12,
         activatedOpacity: 0.24
+    },
+    canvas: {
+        background: '#272829'
     }
 }
 
@@ -282,9 +289,9 @@ export default function createPalette(palette: Palette): Palette {
             augmentColor,
             tonalOffset,
             canvas,
-            path,
-            ...modes[mode]
+            path
         },
+        modes[mode],
         other
     )
 

@@ -1,11 +1,11 @@
-import { PaperScope, Path, ToolEvent } from '@yomyer/paper'
+import { PaperScope, Artboard, ToolEvent } from '@yomyer/paper'
 import { round } from '../../utils/mathUtils'
 import { YomtorTheme } from '../../styles/createTheme'
 import { createObjectTool } from '../../utils/createObjectTool'
 
 export default createObjectTool(
     (e: ToolEvent, canvas: PaperScope, theme: YomtorTheme) =>
-        new Path.Rectangle({
+        new Artboard({
             from: round(e.downPoint),
             to: round(e.point),
             strokeColor: theme.palette.path.default.border,
@@ -13,14 +13,14 @@ export default createObjectTool(
             guide: true,
             parent: canvas.guidesLayer
         }),
-    (e: ToolEvent, _canvas: PaperScope, theme: YomtorTheme) =>
-        new Path.Rectangle({
+    (e: ToolEvent) =>
+        new Artboard({
             from: round(e.downPoint),
             to: round(e.point),
-            strokeColor: theme.palette.path.default.border,
-            fillColor: theme.palette.path.default.background,
-            name: 'Rectangle',
+            fillColor: 'white',
+            name: 'Artboard',
             actived: true
         }),
-    'Rectangle'
+    'Artboard',
+    'a'
 )

@@ -11,6 +11,7 @@ import {
     Yomtor,
     ZoomTool,
     RectangleTool,
+    ArtboardTool,
     SelectorTool,
     TransformControl,
     createTheme,
@@ -146,6 +147,9 @@ const App = () => {
                         <OvalTool>
                             <button>Oval</button>
                         </OvalTool>
+                        <ArtboardTool>
+                            <button>Artboard</button>
+                        </ArtboardTool>
                     </Toolbar>
                     <Canvas>
                         <ZoomTool />

@@ -1,14 +1,19 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { createUseStyles } from 'react-jss'
 import { EditorContext } from '../Yomtor'
 import paper from '@yomyer/paper'
+import { YomtorTheme } from '../../styles/createTheme'
 
 type Props = {
     actions?: React.ReactNode
 }
 type Classes = 'root' | 'tools' | 'canvas'
 
-const useStyles = createUseStyles<Classes>({
+const useStyles = createUseStyles<
+    Classes,
+    { hasArtboards: boolean },
+    YomtorTheme
+>((theme) => ({
     root: {
         height: '100%',
         width: '100%'
@@ -19,17 +24,20 @@ const useStyles = createUseStyles<Classes>({
         right: 0
     },
     canvas: {
-        background: 'white',
+        background: (props) =>
+            props.hasArtboards ? theme.palette.canvas.background : 'white',
         width: '100%',
         height: '100%'
     }
-})
+}))
 
 const Canvas: React.FC<Props> = ({ children }) => {
-    const styles = useStyles()
     const wrapperRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const { canvas, initCanvas } = useContext(EditorContext)
+    const [hasArtboards, setHasArtboards] = useState(false)
+
+    const styles = useStyles({ hasArtboards })
 
     useEffect(() => {
         const scope = new paper.PaperScope()
@@ -37,6 +45,16 @@ const Canvas: React.FC<Props> = ({ children }) => {
         scope.setup(canvasRef.current)
         initCanvas(scope)
     }, [])
+
+    useEffect(() => {
+        if (!canvas) {
+            return
+        }
+
+        canvas.on('object:created', () => {
+            setHasArtboards(!!canvas.project.artboards.length)
+        })
+    }, [canvas])
 
     return (
         <div className={styles.root} ref={wrapperRef}>
