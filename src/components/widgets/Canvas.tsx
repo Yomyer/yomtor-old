@@ -41,7 +41,7 @@ const Canvas: React.FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const scope = new paper.PaperScope()
-
+        scope.settings.hitGuides = true
         scope.setup(canvasRef.current)
         initCanvas(scope)
     }, [])
@@ -51,7 +51,7 @@ const Canvas: React.FC<Props> = ({ children }) => {
             return
         }
 
-        canvas.on('object:created', () => {
+        canvas.on(['object:created', 'object:deleted'], () => {
             setHasArtboards(!!canvas.project.artboards.length)
         })
     }, [canvas])

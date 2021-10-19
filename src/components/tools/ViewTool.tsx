@@ -73,7 +73,11 @@ const ViewTool: React.FC<Props> = ({ children, factor }) => {
         })
 
         canvas.view.on('mousedrag', (e: MouseEvent) => {
-            const rect = new Rectangle(new Point(0, 0), canvas.view.viewSize)
+            const rect = new Rectangle(
+                new Point(0, 0),
+                canvas.view.viewSize
+            ).expand(-5)
+
             const point = canvas.view.projectToView(e.point)
             const inside = rect.contains(point)
 
@@ -84,8 +88,8 @@ const ViewTool: React.FC<Props> = ({ children, factor }) => {
 
             if (!inside) {
                 scrollDragDirection.current = new Point(
-                    point.x < 0 ? -1 : point.x > rect.width ? 1 : 0,
-                    point.y < 0 ? -1 : point.y > rect.height ? 1 : 0
+                    point.x < rect.x ? -1 : point.x > rect.width ? 1 : 0,
+                    point.y < rect.y ? -1 : point.y > rect.height ? 1 : 0
                 )
 
                 canvas.view.center = canvas.view.center.add(

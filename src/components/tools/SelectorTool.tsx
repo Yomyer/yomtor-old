@@ -107,18 +107,23 @@ const SelectorTool: React.FC = ({ children }) => {
         }
 
         if (selectRect.current) {
-            const match = {
+            const itemMatch = {
                 class: canvas.Item,
+                inside: e.modifiers.alt && selectRect.current.bounds,
+                overlapping: !e.modifiers.alt && selectRect.current.bounds,
                 match: (item: Item) => {
-                    return !item.guide && !['Layer'].includes(item.className)
+                    return !item.guide && !(item instanceof Group)
                 }
+            }
+            const artboardMatch = {
+                class: canvas.Artboard,
+                inside: selectRect.current.bounds
             }
 
             if (selectRect.current.layer) {
-                match[e.modifiers.alt ? 'inside' : 'overlapping'] =
-                    selectRect.current.bounds
-
-                const items = canvas.project.getItems(match)
+                const items = canvas.project.activeLayer
+                    .getItems(artboardMatch)
+                    .concat(canvas.project.activeLayer.getItems(itemMatch))
                 canvas.project.deactivateAll()
 
                 const deactives = intersectionWith(
@@ -256,7 +261,9 @@ const SelectorTool: React.FC = ({ children }) => {
                     hightlight.current.remove()
                 }
 
-                const item = canvas.project.getItemByPoint(e.downPoint)
+                const item = canvas.project.getItemByPoint(e.downPoint, {
+                    legacy: e.modifiers.meta
+                })
                 const updated = canvas.project.activeItems.length
                     ? 'updated'
                     : 'created'
@@ -324,7 +331,9 @@ const SelectorTool: React.FC = ({ children }) => {
         tool.onMouseMove = (e: ToolEvent) => {
             if (hightlight.current) hightlight.current.remove()
 
-            const item = canvas.project.getItemByPoint(e.point)
+            const item = canvas.project.getItemByPoint(e.point, {
+                legacy: e.modifiers.meta
+            })
 
             if (item && !item.actived) {
                 hightlight.current =

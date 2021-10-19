@@ -39,6 +39,9 @@ const useStyles = makeStyles((theme) => ({
     },
     main: {
         height: '100%'
+    },
+    canvas: {
+        flexGrow: 1
     }
 }))
 
@@ -82,7 +85,7 @@ const App = () => {
     const [session, setSession] = useState<Session>({})
     const [socket, setSocket] = useState<Socket>(null)
     const [players, setPlayers] = useState<Player[]>([])
-    const { aside, main } = useStyles()
+    const { aside, main, canvas } = useStyles()
 
     const settings = {
         colors: [new Color('#000'), new Color('#000')]
@@ -139,34 +142,46 @@ const App = () => {
                         <RectProperties />
                     </Properties>
                 </Grid>
-                <Grid item xs={12}>
-                    <Toolbar>
-                        <RectangleTool>
-                            <button>Rect</button>
-                        </RectangleTool>
-                        <OvalTool>
-                            <button>Oval</button>
-                        </OvalTool>
-                        <ArtboardTool>
-                            <button>Artboard</button>
-                        </ArtboardTool>
-                    </Toolbar>
-                    <Canvas>
-                        <ZoomTool />
-                        <SelectorTool>
-                            <TransformControl />
-                        </SelectorTool>
-                        <CursorInfoTool />
-                        <ViewTool />
-                        <SnapTool />
-                        <PlayersTool
-                            life
-                            players={players}
-                            owner={socket && socket.id}
-                            onModified={onModified}
-                            onSelected={onSelected}
-                        />
-                    </Canvas>
+                <Grid
+                    container
+                    direction='column'
+                    alignItems='stretch'
+                    justify='flex-start'
+                    wrap='nowrap'
+                    item
+                    xs={12}
+                >
+                    <Grid item>
+                        <Toolbar>
+                            <RectangleTool>
+                                <button>Rect</button>
+                            </RectangleTool>
+                            <OvalTool>
+                                <button>Oval</button>
+                            </OvalTool>
+                            <ArtboardTool>
+                                <button>Artboard</button>
+                            </ArtboardTool>
+                        </Toolbar>
+                    </Grid>
+                    <Grid item className={canvas}>
+                        <Canvas>
+                            <ZoomTool />
+                            <SelectorTool>
+                                <TransformControl />
+                            </SelectorTool>
+                            <CursorInfoTool />
+                            <ViewTool />
+                            <SnapTool />
+                            <PlayersTool
+                                life
+                                players={players}
+                                owner={socket && socket.id}
+                                onModified={onModified}
+                                onSelected={onSelected}
+                            />
+                        </Canvas>
+                    </Grid>
                 </Grid>
             </Grid>
         </Yomtor>
