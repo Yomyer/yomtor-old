@@ -13,7 +13,6 @@ import {
     RectangleTool,
     ArtboardTool,
     SelectorTool,
-    TransformControl,
     createTheme,
     CursorInfoTool,
     PlayersTool,
@@ -167,9 +166,7 @@ const App = () => {
                     <Grid item className={canvas}>
                         <Canvas>
                             <ZoomTool />
-                            <SelectorTool>
-                                <TransformControl />
-                            </SelectorTool>
+                            <SelectorTool />
                             <CursorInfoTool />
                             <ViewTool />
                             <SnapTool />

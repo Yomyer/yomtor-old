@@ -17,9 +17,9 @@ import React, {
 } from 'react'
 import { useHotkeys, HotKeysEvent } from '../../uses/useHokeys'
 import { EditorContext } from '../Yomtor'
-import SelectorSelect from './selector/SelectorSelect'
+// import SelectorSelect from './selector/SelectorSelect'
 
-const SelectorTool: React.FC = ({ children }) => {
+const SelectorTool: React.FC = (/* { children } */) => {
     const { canvas, theme } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const hightlight = useRef<Item>(null)
@@ -104,6 +104,11 @@ const SelectorTool: React.FC = ({ children }) => {
                 strokeWidth: 1 / canvas.view.zoom,
                 guide: true
             })
+
+            selectRect.current.removeOn({
+                up: true,
+                drag: true
+            })
         }
 
         if (selectRect.current) {
@@ -140,11 +145,6 @@ const SelectorTool: React.FC = ({ children }) => {
 
                 deactives.forEach((item) => (item.actived = false))
                 actives.forEach((item) => (item.actived = true))
-
-                selectRect.current.removeOn({
-                    up: true,
-                    drag: true
-                })
 
                 if (e.modifiers.shift && selectItems.current === null) {
                     selectItems.current = [...canvas.project.activeItems]
@@ -248,6 +248,7 @@ const SelectorTool: React.FC = ({ children }) => {
             let action = null
             mode.current = 'select'
 
+            // Todo aquí verificamos si hace click en un control :D
             if (selector.current) {
                 action = selector.current.hitTest(e.downPoint, {
                     stroke: false,
@@ -255,7 +256,6 @@ const SelectorTool: React.FC = ({ children }) => {
                 })
                 mode.current = 'action'
             }
-
             if (!action) {
                 if (hightlight.current) {
                     hightlight.current.remove()
@@ -264,6 +264,7 @@ const SelectorTool: React.FC = ({ children }) => {
                 const item = canvas.project.getItemByPoint(e.downPoint, {
                     legacy: e.modifiers.meta
                 })
+
                 const updated = canvas.project.activeItems.length
                     ? 'updated'
                     : 'created'
@@ -323,6 +324,7 @@ const SelectorTool: React.FC = ({ children }) => {
             if (['move', 'clone'].includes(mode.current)) {
                 move(e)
             }
+
             if (mode.current === 'select') {
                 rectSelectorController(e)
             }
@@ -377,7 +379,12 @@ const SelectorTool: React.FC = ({ children }) => {
             }
 
             if (['delete', 'backspace'].includes(e.key)) {
-                const items = canvas.project.activeItems
+                let items = canvas.project.activeItems
+
+                canvas.project.activeItems.forEach((item) => item.remove())
+                canvas.project.deactivateAll()
+                canvas.fire('selection:cleared', { items })
+
                 canvas.fire('object:deleted', {
                     items: items.map((item) => {
                         item.data.deleted = true
@@ -385,10 +392,7 @@ const SelectorTool: React.FC = ({ children }) => {
                     })
                 })
 
-                canvas.project.activeItems.forEach((item) => item.remove())
-                canvas.project.deactivateAll()
-
-                canvas.fire('selection:cleared', { items })
+                items = null
             }
         }
 
@@ -420,7 +424,7 @@ const SelectorTool: React.FC = ({ children }) => {
         [tool]
     )
 
-    return <SelectorSelect ref={selector}>{children}</SelectorSelect>
+    return <></>
 }
 
 export default SelectorTool

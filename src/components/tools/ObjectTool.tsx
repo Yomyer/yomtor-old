@@ -103,7 +103,8 @@ const ObjectTool: React.FC<Props> = ({
     useHotkeys(
         hotKey,
         () => {
-            if (tool && tool.mainActived) {
+            console.log('dasdasdasda', tool.mainActived)
+            if (tool && (tool.mainActived || tool.mainActived === undefined)) {
                 setInserMode(true)
             }
         },

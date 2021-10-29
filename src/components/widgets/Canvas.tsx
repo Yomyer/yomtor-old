@@ -41,7 +41,6 @@ const Canvas: React.FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const scope = new paper.PaperScope()
-        scope.settings.hitGuides = true
         scope.setup(canvasRef.current)
         initCanvas(scope)
     }, [])
