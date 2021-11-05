@@ -32,10 +32,17 @@ const SelectorTool: React.FC = (/* { children } */) => {
     const moved = useRef<boolean>(false)
     const selectItems = useRef<Item[]>(null)
 
-    const isActiveItemsUpdated = (): boolean => {
+    const compareToItemList = (a: Item[], b: Item[]): boolean => {
         return isEqual(
-            activedItems.current.map((item) => item.uid),
-            canvas.project.activeItems.map((item) => item.uid)
+            (a || []).map((item) => item.uid).sort(),
+            (b || []).map((item) => item.uid).sort()
+        )
+    }
+
+    const isActiveItemsUpdated = (): boolean => {
+        return compareToItemList(
+            activedItems.current,
+            canvas.project.activeItems
         )
     }
     const updateAtiveItems = () => {
@@ -129,31 +136,38 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 const items = canvas.project.activeLayer
                     .getItems(artboardMatch)
                     .concat(canvas.project.activeLayer.getItems(itemMatch))
+
                 canvas.project.deactivateAll()
 
-                const deactives = intersectionWith(
-                    items,
-                    activedItems.current,
-                    isEqual
-                )
+                const deactives = e.modifiers.shift
+                    ? intersectionWith(
+                          items,
+                          activedItems.current,
+                          (a: Item, b: Item) => a.uid === b.uid
+                      )
+                    : []
 
-                const actives = differenceWith(
-                    activedItems.current.concat(items),
-                    deactives,
-                    isEqual
-                )
+                const actives = e.modifiers.shift
+                    ? differenceWith(
+                          activedItems.current.concat(items),
+                          deactives,
+                          (a: Item, b: Item) => a.uid === b.uid
+                      )
+                    : activedItems.current.concat(items)
 
-                deactives.forEach((item) => (item.actived = false))
-                actives.forEach((item) => (item.actived = true))
+                if (!compareToItemList(actives, canvas.project.activeItems)) {
+                    actives.forEach((item) => (item.actived = true))
+                    deactives.forEach((item) => (item.actived = false))
+                }
 
                 if (e.modifiers.shift && selectItems.current === null) {
                     selectItems.current = [...canvas.project.activeItems]
                 }
 
                 if (
-                    !isEqual(
-                        (selectItems.current || []).map((item) => item.uid),
-                        canvas.project.activeItems.map((item) => item.uid)
+                    !compareToItemList(
+                        selectItems.current,
+                        canvas.project.activeItems
                     )
                 ) {
                     let action = 'updated'

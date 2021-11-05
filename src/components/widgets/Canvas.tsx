@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { createUseStyles } from 'react-jss'
 import { EditorContext } from '../Yomtor'
-import paper from '@yomyer/paper'
+import paper, { Color, Grid, Size } from '@yomyer/paper'
 import { YomtorTheme } from '../../styles/createTheme'
 
 type Props = {
@@ -42,6 +42,9 @@ const Canvas: React.FC<Props> = ({ children }) => {
     useEffect(() => {
         const scope = new paper.PaperScope()
         scope.setup(canvasRef.current)
+
+        new Grid()
+
         initCanvas(scope)
     }, [])
 
