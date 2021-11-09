@@ -31,6 +31,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
     const beforePositions = useRef<Point[]>([])
     const moved = useRef<boolean>(false)
     const selectItems = useRef<Item[]>(null)
+    const mouseEvent = useRef<ToolEvent>(null)
 
     const compareToItemList = (a: Item[], b: Item[]): boolean => {
         return isEqual(
@@ -99,6 +100,32 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 })
             }
         }
+    }
+    const hightlightController = (e?: ToolEvent) => {
+        if (hightlight.current) hightlight.current.remove()
+
+        if (selectRect.current) return
+        if (!e) e = mouseEvent.current
+        if (!e) return
+
+        const item = canvas.project.getItemByPoint(e.point, {
+            legacy: e.modifiers.meta
+        })
+
+        if (item && !item.actived) {
+            hightlight.current =
+                ((item as Path).pathData &&
+                    new canvas.Path((item as Path).pathData)) ||
+                new canvas.Path.Rectangle(item.bounds)
+
+            hightlight.current.set({
+                strokeColor: theme.palette.canvas.highlight.border,
+                strokeWidth: 2 / canvas.view.zoom,
+                guide: true
+            })
+        }
+
+        mouseEvent.current = e
     }
 
     const rectSelectorController = (e: KeyEvent | ToolEvent) => {
@@ -345,30 +372,14 @@ const SelectorTool: React.FC = (/* { children } */) => {
         }
 
         tool.onMouseMove = (e: ToolEvent) => {
-            if (hightlight.current) hightlight.current.remove()
-
-            const item = canvas.project.getItemByPoint(e.point, {
-                legacy: e.modifiers.meta
-            })
-
-            if (item && !item.actived) {
-                hightlight.current =
-                    ((item as Path).pathData &&
-                        new canvas.Path((item as Path).pathData)) ||
-                    new canvas.Path.Rectangle(item.bounds)
-
-                hightlight.current.set({
-                    strokeColor: theme.palette.canvas.highlight.border,
-                    strokeWidth: 2 / canvas.view.zoom,
-                    guide: true
-                })
-            }
+            hightlightController(e)
         }
 
         tool.onMouseUp = (e: ToolEvent) => {
             clonedItems.current = []
             beforePositions.current = []
             selectItems.current = null
+            selectRect.current = null
 
             if (moved.current) {
                 canvas.fire('object:moved', e)
@@ -435,6 +446,13 @@ const SelectorTool: React.FC = (/* { children } */) => {
         (_, e: HotKeysEvent) => {
             arrowMove(e)
         },
+        [tool]
+    )
+
+    useHotkeys(
+        '*+cmd',
+        () => hightlightController(),
+        () => hightlightController(),
         [tool]
     )
 

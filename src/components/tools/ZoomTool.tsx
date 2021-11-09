@@ -43,6 +43,8 @@ const ZoomTool: React.FC<Props> = ({ factor }) => {
                 )
 
                 setZoom(newZoom)
+
+                tool.activeMain()
             } else {
                 tool.activeMain()
             }

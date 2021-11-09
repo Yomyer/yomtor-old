@@ -16,13 +16,21 @@ import {
     setCursor
 } from '../../utils/cursorUtils'
 import { Grabbing } from '../icons/cursor/Grabbing'
-import { MouseEvent, Point, Rectangle, Tool, ToolEvent } from '@yomyer/paper'
+import {
+    MouseEvent,
+    Point,
+    Rectangle,
+    Tool,
+    ToolEvent,
+    Grid
+} from '@yomyer/paper'
 
 type Props = {
     factor?: number
+    pixelGrid?: boolean
 }
 
-const ViewTool: React.FC<Props> = ({ children, factor }) => {
+const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
     const { canvas } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const offset = useRef<Point>()
@@ -67,6 +75,10 @@ const ViewTool: React.FC<Props> = ({ children, factor }) => {
     useEffect(() => {
         if (!canvas) return
         setTool(canvas.createTool('View'))
+
+        if (pixelGrid) {
+            canvas.project.grid = new Grid({ actived: true })
+        }
 
         canvas.view.on('mousemove', (e: MouseEvent) => {
             offset.current = e.point
@@ -192,7 +204,8 @@ const ViewTool: React.FC<Props> = ({ children, factor }) => {
 }
 
 ViewTool.defaultProps = {
-    factor: 5
+    factor: 5,
+    pixelGrid: true
 }
 
 export default ViewTool

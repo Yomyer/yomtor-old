@@ -24,7 +24,7 @@ export default createObjectTool(
                 new Path.Rectangle({
                     from: round(e.downPoint),
                     to: round(e.point),
-                    fillColor: 'red'
+                    fillColor: 'yellow'
                 })
             ]
         }),
