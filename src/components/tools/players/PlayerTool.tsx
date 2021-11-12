@@ -1,7 +1,7 @@
 import { Item, Path } from '@yomyer/paper'
 import React, { useContext, useEffect, useRef } from 'react'
 import { Player } from '../../../models'
-import { EditorContext } from '../../Yomtor'
+import EditorContext from '../../EditorContext'
 
 type PlayerToolProps = {
     player: Player

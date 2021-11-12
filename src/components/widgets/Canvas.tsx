@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { createUseStyles } from 'react-jss'
-import { EditorContext } from '../Yomtor'
 import { PaperScope } from '@yomyer/paper'
 import { YomtorTheme } from '../../styles/createTheme'
+import EditorContext from '../EditorContext'
 
 type Props = {
     actions?: React.ReactNode
@@ -34,7 +34,7 @@ const useStyles = createUseStyles<
 const Canvas: React.FC<Props> = ({ children }) => {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const { canvas, initCanvas } = useContext(EditorContext)
+    const { canvas, initCanvas, setCursor } = useContext(EditorContext)
     const [hasArtboards, setHasArtboards] = useState(false)
 
     const styles = useStyles({ hasArtboards })
@@ -44,6 +44,7 @@ const Canvas: React.FC<Props> = ({ children }) => {
         scope.setup(canvasRef.current)
 
         initCanvas(scope)
+        setCursor('default')
     }, [])
 
     useEffect(() => {

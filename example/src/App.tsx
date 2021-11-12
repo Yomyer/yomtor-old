@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+// import React, { useEffect, useState } from 'react'
 import { Grid, Toolbar, makeStyles, useMediaQuery } from '@material-ui/core'
-import socketIOClient, { Socket } from 'socket.io-client'
+// import socketIOClient, { Socket } from 'socket.io-client'
 
 import {
     OvalTool,
@@ -14,16 +15,15 @@ import {
     ArtboardTool,
     SelectorTool,
     createTheme,
-    CursorInfoTool,
-    PlayersTool,
-    Player,
+    // PlayersTool,
+    // Player,
     Color,
-    colorWord,
+    // colorWord,
     ViewTool,
     SnapTool
 } from 'yomtor'
 
-const ENDPOINT = 'http://localhost:4000'
+// const ENDPOINT = 'http://localhost:4000'
 const maxWidth = 240
 
 const useStyles = makeStyles((theme) => ({
@@ -43,6 +43,8 @@ const useStyles = makeStyles((theme) => ({
         flexGrow: 1
     }
 }))
+
+/*
 
 const names = [
     'Sergio',
@@ -78,12 +80,16 @@ type Session = {
     token?: string
 }
 
+*/
+
 const App = () => {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
     // const [response, setResponse] = useState('')
+    /*
     const [session, setSession] = useState<Session>({})
     const [socket, setSocket] = useState<Socket>(null)
     const [players, setPlayers] = useState<Player[]>([])
+    */
     const { aside, main, canvas } = useStyles()
 
     const settings = {
@@ -91,6 +97,7 @@ const App = () => {
     }
     const theme = createTheme({ type: prefersDarkMode ? 'dark' : 'light' })
 
+    /*
     useEffect(() => {
         const socket = socketIOClient(ENDPOINT)
         setSocket(socket)
@@ -131,6 +138,7 @@ const App = () => {
     const onSelected = (data: Player) => {
         socket.emit('player:selected', data)
     }
+    */
 
     return (
         <Yomtor settings={settings} theme={theme}>
@@ -167,9 +175,9 @@ const App = () => {
                         <Canvas>
                             <ZoomTool />
                             <SelectorTool />
-                            <CursorInfoTool />
                             <ViewTool />
                             <SnapTool />
+                            {/*
                             <PlayersTool
                                 life
                                 players={players}
@@ -177,6 +185,7 @@ const App = () => {
                                 onModified={onModified}
                                 onSelected={onSelected}
                             />
+                            */}
                         </Canvas>
                     </Grid>
                 </Grid>

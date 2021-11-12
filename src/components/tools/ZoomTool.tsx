@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState, useCallback } from 'react'
 import { useEventListener } from '../../uses/useEventListener'
 import { useHotkeys } from '../../uses/useHokeys'
 import Button from '../override/Button'
-import { EditorContext } from '../Yomtor'
+import EditorContext from '../EditorContext'
 
 type Props = {
     factor?: number

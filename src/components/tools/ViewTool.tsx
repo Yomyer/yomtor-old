@@ -5,17 +5,9 @@ import React, {
     useRef,
     useState
 } from 'react'
-import { EditorContext } from '../Yomtor'
+import EditorContext from '../EditorContext'
 import { HotKeysEvent, useHotkeys } from '../../uses/useHokeys'
-import { setGlobalCursor } from '../../utils'
 import { useEventListener } from '../../uses/useEventListener'
-import { Grab } from '../icons/cursor'
-import {
-    clearCursor,
-    clearGlobalCursor,
-    setCursor
-} from '../../utils/cursorUtils'
-import { Grabbing } from '../icons/cursor/Grabbing'
 import {
     MouseEvent,
     Point,
@@ -31,7 +23,13 @@ type Props = {
 }
 
 const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
-    const { canvas } = useContext(EditorContext)
+    const {
+        canvas,
+        setGlobalCursor,
+        setCursor,
+        clearCursor,
+        clearGlobalCursor
+    } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const offset = useRef<Point>()
     const scrollDragDirection = useRef<Point>()
@@ -151,7 +149,7 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         if (!tool) return
 
         tool.onMouseDown = () => {
-            setGlobalCursor(Grabbing)
+            setGlobalCursor('grabbing')
         }
 
         tool.onMouseDrag = (e: ToolEvent) => {
@@ -160,7 +158,8 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         }
 
         tool.onMouseUp = () => {
-            clearGlobalCursor(Grabbing)
+            clearGlobalCursor('grabbing')
+            clearCursor('grab')
         }
     }, [tool])
 
@@ -168,15 +167,15 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         'space',
         () => {
             if (tool && tool.mainActived) {
-                setCursor(Grab, canvas.view.element)
+                setCursor('grab')
                 tool.activate()
             }
             return false
         },
         () => {
             if (tool && tool.actived) {
-                clearGlobalCursor()
-                clearCursor(canvas.view.element)
+                clearGlobalCursor('grabbing')
+                clearCursor('grab')
                 tool.activeMain()
             }
             return false

@@ -16,11 +16,11 @@ import React, {
     useState
 } from 'react'
 import { useHotkeys, HotKeysEvent } from '../../uses/useHokeys'
-import { EditorContext } from '../Yomtor'
-// import SelectorSelect from './selector/SelectorSelect'
+import EditorContext from '../EditorContext'
+import ControlsTool from './ControlsTool'
 
 const SelectorTool: React.FC = (/* { children } */) => {
-    const { canvas, theme } = useContext(EditorContext)
+    const { canvas, theme, setCursor, clearCursor } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const hightlight = useRef<Item>(null)
     const selector = useRef<Group>(null)
@@ -286,6 +286,8 @@ const SelectorTool: React.FC = (/* { children } */) => {
         }
 
         tool.onMouseDown = (e: ToolEvent) => {
+            if (!tool.actived) return
+
             let action = null
             mode.current = 'select'
 
@@ -456,7 +458,20 @@ const SelectorTool: React.FC = (/* { children } */) => {
         [tool]
     )
 
-    return <></>
+    useHotkeys(
+        '*+alt',
+        () => {
+            console.log('clone?')
+            setCursor('default', 0, 'clone')
+        },
+        () => {
+            console.log('clear?')
+            clearCursor('default', 0, 'clone')
+        },
+        [tool]
+    )
+
+    return <ControlsTool />
 }
 
 export default SelectorTool

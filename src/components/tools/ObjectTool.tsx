@@ -8,7 +8,7 @@ import React, {
     MutableRefObject
 } from 'react'
 import { useHotkeys } from '../../uses/useHokeys'
-import { EditorContext } from '../Yomtor'
+import EditorContext from '../EditorContext'
 import { YomtorTheme } from '../../styles/createTheme'
 
 type Props = {

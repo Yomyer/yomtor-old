@@ -1,6 +1,6 @@
 import { Item, Point, Size } from '@yomyer/paper'
 import { isUndefined } from 'lodash'
-import { normalize, sign } from './mathUtils'
+import { sign } from './mathUtils'
 
 export const PiBy180 = Math.PI / 180
 export const degreesToRadians = (degrees: number): number => {
@@ -9,25 +9,6 @@ export const degreesToRadians = (degrees: number): number => {
 
 export const radiansToDegrees = function (radians: number): number {
     return radians / PiBy180
-}
-
-export function findCornerQuadrant(
-    cursor: { point?: Point; corner?: Item; angle: number },
-    item: Item
-) {
-    const point = rotatePoint(
-        cursor.point || cursor.corner.position,
-        item.position,
-        -cursor.angle || 0
-    )
-    const direction = sign(normalize(point.subtract(item.position)))
-
-    const delta =
-        radiansToDegrees(Math.atan2(direction.y, direction.x)) +
-        360 +
-        (item.angle || 0)
-
-    return Math.round((delta % 360) / 45)
 }
 
 export const rotatePoint = (

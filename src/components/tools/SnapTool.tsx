@@ -1,6 +1,6 @@
 import { Tool } from '@yomyer/paper'
 import React, { useContext, useEffect, useState } from 'react'
-import { EditorContext } from '../Yomtor'
+import EditorContext from '../EditorContext'
 
 const SnapTool = () => {
     const { canvas } = useContext(EditorContext)

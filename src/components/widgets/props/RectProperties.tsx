@@ -3,8 +3,8 @@ import React, { useContext, useEffect, useCallback, useState } from 'react'
 import { round } from '../../../utils/mathUtils'
 import { Block, Section } from '../../containers'
 import { NumericField } from '../../fields'
-import { EditorContext } from '../../Yomtor'
-import { Selector, Tool } from '@yomyer/paper'
+import EditorContext from '../../EditorContext'
+import { Tool } from '@yomyer/paper'
 import { scaleWithRotate } from '../../../utils/trigonometryUtils'
 
 type Rect = {
@@ -44,14 +44,14 @@ const RectProperties: React.FC = () => {
     const updateRect = useCallback(
         (toFix = 2) => {
             const rects: Rect[] = canvas.project.activeItems.map((item) => {
-                const selector = item.selector
+                const info = item.activeInfo
 
                 return {
-                    width: round(selector.size.width || 0, 2) || 0.5,
-                    height: round(selector.size.height || 0, 2) || 0.5,
-                    left: round(selector.bounds.topLeft.x || 0, toFix) || 0,
-                    top: round(selector.bounds.topLeft.y || 0, toFix) || 0,
-                    angle: round(selector.angle || 0, 0) || 0
+                    width: round(info.width || 0, 2) || 0.5,
+                    height: round(info.height || 0, 2) || 0.5,
+                    left: round(info.topLeft.x || 0, toFix) || 0,
+                    top: round(info.topLeft.y || 0, toFix) || 0,
+                    angle: round(info.angle % 181 || 0, 0) || 0
                 }
             })
             const rect = rects[0]
@@ -85,45 +85,42 @@ const RectProperties: React.FC = () => {
             const value = target.value
             const name = target.name
 
-            const actives = canvas.project.activeItems.map((item) => {
-                return item.selector
-            })
-            actives.forEach((selector: Selector) => {
+            canvas.project.activeItems.forEach((item) => {
                 let alter = +value
 
                 if (e.type !== 'mouseup') {
                     switch (name) {
                         case 'angle':
                             if (e.type !== 'keypress' && multiple.angle) {
-                                alter += selector.angle
+                                alter += item.activeInfo.angle
                             }
-                            selector.item.rotate(alter - selector.angle)
+                            item.rotate(alter - item.activeInfo.angle)
                             break
 
                         case 'width':
                         case 'height':
                             if (e.type !== 'keypress') {
                                 if (multiple.width && name === 'width') {
-                                    alter += selector.size.width
+                                    alter += item.activeInfo.width
                                 }
                                 if (multiple.height && name === 'height') {
-                                    alter += selector.size.height
+                                    alter += item.activeInfo.height
                                 }
                             }
 
                             const factor = new canvas.Point(
                                 name === 'width'
-                                    ? alter / selector.size.width
+                                    ? alter / item.activeInfo.width
                                     : 1,
                                 name === 'height'
-                                    ? alter / selector.size.height
+                                    ? alter / item.activeInfo.height
                                     : 1
                             )
 
                             scaleWithRotate(
-                                selector.item,
+                                item,
                                 factor,
-                                selector.points[
+                                item.activeInfo[
                                     name === 'width'
                                         ? 'leftCenter'
                                         : 'topCenter'
@@ -135,25 +132,23 @@ const RectProperties: React.FC = () => {
                         case 'top':
                             if (e.type !== 'keypress') {
                                 if (multiple.left && name === 'left') {
-                                    alter += selector.bounds.topLeft.x
+                                    alter += item.activeInfo.topLeft.x
                                 }
                                 if (multiple.top && name === 'top') {
-                                    alter += selector.bounds.topLeft.y
+                                    alter += item.activeInfo.topLeft.y
                                 }
                             }
 
                             const delta = new canvas.Point(
                                 name === 'left'
-                                    ? alter - selector.bounds.topLeft.x
+                                    ? alter - item.activeInfo.topLeft.x
                                     : 0,
                                 name === 'top'
-                                    ? alter - selector.bounds.topLeft.y
+                                    ? alter - item.activeInfo.topLeft.y
                                     : 0
                             )
 
-                            selector.item.position = selector.item.position.add(
-                                delta
-                            )
+                            item.position = item.position.add(delta)
 
                             break
                     }
@@ -219,23 +214,11 @@ const RectProperties: React.FC = () => {
         canvas.on('object:scaled', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
 
-        /*
         canvas.on('object:moving', () => updateRect(0))
         canvas.on('object:scaling', () => updateRect(0))
         canvas.on('object:rotating', () => updateRect())
-        */
 
         setTool(canvas.createTool('RectProperties'))
-        /*
-        canvas.on('selection:updated', () => console.log('selection:updated'))
-        canvas.on('selection:created', () => console.log('selection:created'))
-        canvas.on('selection:cleared', () => console.log('selection:cleared'))
-        canvas.on('object:moving', () => console.log('object:moving'))
-        canvas.on('object:scaling', () => console.log('object:scaling'))
-        canvas.on('object:rotating', () => console.log('object:rotating'))
-        canvas.on('object:moved', () => console.log('object:moved'))
-        canvas.on('object:moving', () => console.log('object:moving'))
-        */
     }, [canvas])
 
     const props = {

@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react'
+import React, { useState } from 'react'
 
 import { Provider } from 'react-redux'
 
@@ -7,27 +7,16 @@ import { Settings } from '../redux/settings/settings.model'
 import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
 import { createTheme } from '../styles'
-import { YomtorTheme } from '../styles/createTheme'
 import { PaperScope } from '@yomyer/paper'
+import CursorController from './icons/CursorController'
+import EditorContext from './EditorContext'
+import { CursorType } from './icons/Cursors'
 
 type Props = {
     settings?: Settings
     theme?: {}
     overrideSettings?: boolean
 }
-
-type EditorContextProps = {
-    canvas: PaperScope | null
-    initCanvas: (c: PaperScope) => void
-    settings: Settings
-    theme: YomtorTheme
-}
-export const EditorContext = createContext<EditorContextProps>({
-    canvas: null,
-    initCanvas: () => {},
-    settings: {},
-    theme: {}
-})
 
 const Yomtor: React.FC<Props> = ({
     children,
@@ -36,8 +25,49 @@ const Yomtor: React.FC<Props> = ({
     overrideSettings
 }) => {
     const [canvas, setCanvas] = useState<PaperScope | null>(null)
+    const [action, setAction] = useState<{
+        action: CursorType
+        rotation: number
+        subAction?: CursorType
+        global?: boolean
+        clear?: boolean
+    }>({
+        action: 'default',
+        rotation: 0
+    })
+
     const initCanvas = (c: PaperScope): void => {
         setCanvas(c)
+    }
+
+    const setCursor = (
+        action: CursorType,
+        rotation = 0,
+        subAction?: CursorType
+    ): void => {
+        setAction({ action, rotation, subAction, global: false, clear: false })
+    }
+    const setGlobalCursor = (
+        action: CursorType,
+        rotation = 0,
+        subAction?: CursorType
+    ): void => {
+        setAction({ action, rotation, subAction, global: true })
+    }
+
+    const clearCursor = (
+        action: CursorType,
+        rotation = 0,
+        subAction?: CursorType
+    ): void => {
+        setAction({ action, rotation, subAction, global: false, clear: true })
+    }
+    const clearGlobalCursor = (
+        action: CursorType,
+        rotation = 0,
+        subAction?: CursorType
+    ): void => {
+        setAction({ action, rotation, subAction, global: true, clear: true })
     }
 
     return (
@@ -49,9 +79,20 @@ const Yomtor: React.FC<Props> = ({
         >
             <ThemeProvider theme={theme || {}}>
                 <EditorContext.Provider
-                    value={{ canvas, initCanvas, settings, theme }}
+                    value={{
+                        canvas,
+                        initCanvas,
+                        settings,
+                        theme,
+                        setCursor,
+                        setGlobalCursor,
+                        clearGlobalCursor,
+                        clearCursor
+                    }}
                 >
                     {children}
+
+                    <CursorController {...action} />
                 </EditorContext.Provider>
             </ThemeProvider>
         </Provider>

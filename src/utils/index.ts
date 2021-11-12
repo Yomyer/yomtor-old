@@ -1,6 +1,5 @@
 export * from './clearProps'
 export * from './colorUtils'
-export * from './createCustomControl'
 export * from './createSvgIcon'
 export * from './cursorUtils'
 export * from './lodashUtils'
