@@ -461,11 +461,9 @@ const SelectorTool: React.FC = (/* { children } */) => {
     useHotkeys(
         '*+alt',
         () => {
-            console.log('clone?')
-            setCursor('default', 0, 'clone')
+            setCursor('cross', 0, 'rectangle')
         },
         () => {
-            console.log('clear?')
             clearCursor('default', 0, 'clone')
         },
         [tool]

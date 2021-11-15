@@ -92,7 +92,7 @@ const Yomtor: React.FC<Props> = ({
                 >
                     {children}
 
-                    <CursorController {...action} />
+                    <CursorController cursor={action} />
                 </EditorContext.Provider>
             </ThemeProvider>
         </Provider>

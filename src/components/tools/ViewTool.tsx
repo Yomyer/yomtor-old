@@ -149,7 +149,7 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         if (!tool) return
 
         tool.onMouseDown = () => {
-            setGlobalCursor('grabbing')
+            setGlobalCursor('buti')
         }
 
         tool.onMouseDrag = (e: ToolEvent) => {
