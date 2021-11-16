@@ -17,6 +17,8 @@ import React, {
 } from 'react'
 import { useHotkeys, HotKeysEvent } from '../../uses/useHokeys'
 import EditorContext from '../EditorContext'
+import Clone from '../icons/cursor/Clone'
+import Default from '../icons/cursor/Default'
 import ControlsTool from './ControlsTool'
 
 const SelectorTool: React.FC = (/* { children } */) => {
@@ -461,10 +463,10 @@ const SelectorTool: React.FC = (/* { children } */) => {
     useHotkeys(
         '*+alt',
         () => {
-            setCursor('cross', 0, 'rectangle')
+            setCursor(Default, 0, Clone)
         },
         () => {
-            clearCursor('default', 0, 'clone')
+            clearCursor(Default, 0, Clone)
         },
         [tool]
     )

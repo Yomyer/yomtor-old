@@ -2,30 +2,26 @@ import { PaperScope } from '@yomyer/paper'
 import { createContext } from 'react'
 import { YomtorTheme } from '../styles/createTheme'
 import { Settings } from '../redux/settings/settings.model'
-import { CursorType } from './icons/Cursors'
+import Cursor from './icons/Cursor'
 
 type EditorContextProps = {
     canvas: PaperScope | null
     initCanvas: (c: PaperScope) => void
-    setCursor: (
-        action: CursorType,
-        rotate?: number,
-        subAction?: CursorType
-    ) => void
+    setCursor: (action: Cursor, rotate?: number, subAction?: Cursor) => void
     setGlobalCursor: (
-        action: CursorType,
+        action: Cursor,
         rotate?: number,
-        subAction?: CursorType
+        subAction?: Cursor
     ) => void
     clearCursor: (
-        action: CursorType,
+        action: Cursor | Cursor[],
         rotate?: number,
-        subAction?: CursorType
+        subAction?: Cursor
     ) => void
     clearGlobalCursor: (
-        action: CursorType,
+        action: Cursor | Cursor[],
         rotate?: number,
-        subAction?: CursorType
+        subAction?: Cursor
     ) => void
     settings: Settings
     theme: YomtorTheme

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react'
 import EditorContext from '../EditorContext'
-import Cursors, { CursorType } from './Cursors'
+import Cursor from './Cursor'
+import Default from './cursor/Default'
 
 type Props = {
     cursor: {
-        action: CursorType
+        action: Cursor | Cursor[]
         rotation: number
-        subAction?: CursorType
+        subAction?: Cursor
         global?: boolean
         clear?: boolean
     }
@@ -20,35 +21,54 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
     )
 
     useEffect(() => {
-        if (!Cursors[action] || !canvas) {
+        if (!canvas) {
             return
         }
 
-        async function setClass() {
-            const name = btoa(action + subAction + rotation)
-                .toLowerCase()
-                .replace(/=/g, '')
+        function clearAll(classList: DOMTokenList, find: string) {
+            classList.forEach((c: string) => {
+                try {
+                    if (c.startsWith(find)) {
+                        classList.remove(c)
+                    }
+                } catch (error) {}
+            })
+        }
 
-            if (!styles[name]) {
-                const tag = await generateStyleTag(name)
+        async function setClass(cursor: Cursor, all?: boolean) {
+            const name =
+                cursor.id +
+                ((subAction && subAction.id) || '') +
+                (rotation || '')
+
+            if (global) {
+                clear && all
+                    ? clearAll(document.body.classList, cursor.id)
+                    : document.body.classList[clear ? 'remove' : 'add'](name)
+            } else {
+                clear && all
+                    ? clearAll(canvas.view.element.classList, cursor.id)
+                    : canvas.view.element.classList[clear ? 'remove' : 'add'](
+                          name
+                      )
+            }
+
+            if (!styles[name] && !clear) {
+                console.log('???')
+                const tag = await generateStyleTag(name, cursor)
                 if (tag) {
                     styles[name] = tag
                     setStyles(styles)
                 }
             }
-
-            if (global) {
-                document.body.classList[clear ? 'remove' : 'add'](`_${name}`)
-            } else {
-                canvas.view.element.classList[clear ? 'remove' : 'add'](
-                    `_${name}`
-                )
-            }
         }
 
-        setClass()
+        action instanceof Array
+            ? action.forEach((a) => setClass(a, true))
+            : setClass(action)
     }, [action, subAction, rotation, global, clear])
 
+    /*
     const toBase64PNG = (svg: SVGElement): Promise<string> => {
         return new Promise((resolve, reject) => {
             const canvas = document.createElement('canvas') as HTMLCanvasElement
@@ -78,6 +98,7 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
             img.src = url
         })
     }
+    */
 
     const toBase64SVG = (svg: SVGElement) => {
         return `data:image/svg+xml;base64,${toBase64(
@@ -126,9 +147,8 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
         return filter
     }
 
-    const generateSVGCursor = (scale = 1): SVGElement => {
-        const cursorData = Cursors[action].props
-        const subCursorData = Cursors[subAction] && Cursors[subAction].props
+    const generateSVGCursor = (cursorData: Cursor, scale = 1): SVGElement => {
+        const subCursorData = subAction
 
         const svg = createNode('svg', {
             width: `64px`,
@@ -180,19 +200,20 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
         return svg
     }
 
-    const generateStyle = async (className: string) => {
-        const data = { x: '4', y: '4', ...Cursors[action].props }
-        const svg64 = toBase64SVG(generateSVGCursor(0.5))
-        const png64 = await toBase64PNG(generateSVGCursor())
+    const generateStyle = async (className: string, cursor: Cursor) => {
+        const data = { x: '4', y: '4', ...cursor }
+        const svg64 = toBase64SVG(generateSVGCursor(cursor, 0.5))
+        const png64 = toBase64SVG(generateSVGCursor(cursor))
 
-        return `body._${className} *, ._${className}{
+        return `body.${className} *, .${className}{
             cursor: url(${png64})${data.x} ${data.y},auto !important;
             cursor: url(${svg64})${data.x} ${data.y},auto !important;
             cursor: -webkit-image-set(url(${png64})2x,url(${png64})1x)${data.x} ${data.y},auto !important;`
     }
 
     const generateStyleTag = async (
-        name: string
+        name: string,
+        cursor: Cursor
     ): Promise<HTMLStyleElement> => {
         if (document.querySelector(`style[cursor="${name}"]`)) {
             return null
@@ -201,7 +222,9 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
         const head = document.head || document.getElementsByTagName('head')[0]
         const style = document.createElement('style') as HTMLStyleElement
         style.setAttribute('cursor', name)
-        style.appendChild(document.createTextNode(await generateStyle(name)))
+        style.appendChild(
+            document.createTextNode(await generateStyle(name, cursor))
+        )
 
         head.appendChild(style)
 
@@ -211,7 +234,7 @@ const CursorController: React.FC<Props> = ({ cursor }) => {
 }
 
 CursorController.defaultProps = {
-    cursor: { action: 'default', subAction: null, rotation: 0, global: false }
+    cursor: { action: Default, subAction: null, rotation: 0, global: false }
 }
 
 export default CursorController

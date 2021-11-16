@@ -3,6 +3,7 @@ import { createUseStyles } from 'react-jss'
 import { PaperScope } from '@yomyer/paper'
 import { YomtorTheme } from '../../styles/createTheme'
 import EditorContext from '../EditorContext'
+import Default from '../icons/cursor/Default'
 
 type Props = {
     actions?: React.ReactNode
@@ -44,7 +45,7 @@ const Canvas: React.FC<Props> = ({ children }) => {
         scope.setup(canvasRef.current)
 
         initCanvas(scope)
-        setCursor('default')
+        setCursor(Default)
     }, [])
 
     useEffect(() => {

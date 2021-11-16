@@ -16,6 +16,8 @@ import {
     ToolEvent,
     Grid
 } from '@yomyer/paper'
+import Grabbing from '../icons/cursor/Grabbing'
+import Grab from '../icons/cursor/Grab'
 
 type Props = {
     factor?: number
@@ -149,7 +151,7 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         if (!tool) return
 
         tool.onMouseDown = () => {
-            setGlobalCursor('buti')
+            setGlobalCursor(Grabbing)
         }
 
         tool.onMouseDrag = (e: ToolEvent) => {
@@ -158,8 +160,7 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         }
 
         tool.onMouseUp = () => {
-            clearGlobalCursor('grabbing')
-            clearCursor('grab')
+            clearGlobalCursor(Grabbing)
         }
     }, [tool])
 
@@ -167,15 +168,15 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         'space',
         () => {
             if (tool && tool.mainActived) {
-                setCursor('grab')
+                setCursor(Grab)
                 tool.activate()
             }
             return false
         },
         () => {
             if (tool && tool.actived) {
-                clearGlobalCursor('grabbing')
-                clearCursor('grab')
+                clearGlobalCursor(Grabbing)
+                clearCursor(Grab)
                 tool.activeMain()
             }
             return false

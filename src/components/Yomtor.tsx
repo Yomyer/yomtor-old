@@ -10,7 +10,8 @@ import { createTheme } from '../styles'
 import { PaperScope } from '@yomyer/paper'
 import CursorController from './icons/CursorController'
 import EditorContext from './EditorContext'
-import { CursorType } from './icons/Cursors'
+import Cursor from './icons/Cursor'
+import Default from './icons/cursor/Default'
 
 type Props = {
     settings?: Settings
@@ -26,13 +27,13 @@ const Yomtor: React.FC<Props> = ({
 }) => {
     const [canvas, setCanvas] = useState<PaperScope | null>(null)
     const [action, setAction] = useState<{
-        action: CursorType
+        action: Cursor | Cursor[]
         rotation: number
-        subAction?: CursorType
+        subAction?: Cursor
         global?: boolean
         clear?: boolean
     }>({
-        action: 'default',
+        action: Default,
         rotation: 0
     })
 
@@ -41,31 +42,31 @@ const Yomtor: React.FC<Props> = ({
     }
 
     const setCursor = (
-        action: CursorType,
+        action: Cursor,
         rotation = 0,
-        subAction?: CursorType
+        subAction?: Cursor
     ): void => {
         setAction({ action, rotation, subAction, global: false, clear: false })
     }
     const setGlobalCursor = (
-        action: CursorType,
+        action: Cursor,
         rotation = 0,
-        subAction?: CursorType
+        subAction?: Cursor
     ): void => {
         setAction({ action, rotation, subAction, global: true })
     }
 
     const clearCursor = (
-        action: CursorType,
+        action: Cursor | Cursor[],
         rotation = 0,
-        subAction?: CursorType
+        subAction?: Cursor
     ): void => {
         setAction({ action, rotation, subAction, global: false, clear: true })
     }
     const clearGlobalCursor = (
-        action: CursorType,
+        action: Cursor | Cursor[],
         rotation = 0,
-        subAction?: CursorType
+        subAction?: Cursor
     ): void => {
         setAction({ action, rotation, subAction, global: true, clear: true })
     }

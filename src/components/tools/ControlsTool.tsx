@@ -11,57 +11,22 @@ import {
 } from '@yomyer/paper'
 import React, { useEffect, useContext, useState, useRef } from 'react'
 import EditorContext from '../EditorContext'
-import {
-    clearCursor,
-    clearGlobalCursor,
-    setCursor,
-    setGlobalCursor
-} from '../../utils/cursorUtils'
 
-import {
-    ResizeNESW,
-    ResizeNWSE,
-    ResizeNS,
-    ResizeEW,
-    RotateE,
-    RotateSE,
-    RotateN,
-    RotateNE,
-    RotateS,
-    RotateSW,
-    RotateW,
-    RotateNW
-} from '../icons/cursor'
 import { useHotkeys } from '../../uses/useHokeys'
 import { sign, normalize, round, abs } from '../../utils/mathUtils'
 import { rotateDelta, scaleWithRotate } from '../../utils/trigonometryUtils'
-
-const resizeCursors = [
-    ResizeEW,
-    ResizeNWSE,
-    ResizeNS,
-    ResizeNESW,
-    ResizeEW,
-    ResizeNWSE,
-    ResizeNS,
-    ResizeNESW,
-    ResizeEW
-]
-const rotateCursors = [
-    RotateE,
-    RotateSE,
-    RotateS,
-    RotateSW,
-    RotateW,
-    RotateNW,
-    RotateN,
-    RotateNE,
-    RotateE
-]
+import Rotate from '../icons/cursor/Rotate'
+import Resize from '../icons/cursor/Resize'
 
 const ControlsTool: React.FC = ({ children }) => {
     const [tool, setTool] = useState<Tool>()
-    const { canvas } = useContext(EditorContext)
+    const {
+        canvas,
+        clearCursor,
+        clearGlobalCursor,
+        setCursor,
+        setGlobalCursor
+    } = useContext(EditorContext)
     const mode = useRef<'resize' | 'rotate'>('resize')
     const cursor = useRef<{
         point?: Point
@@ -69,6 +34,7 @@ const ControlsTool: React.FC = ({ children }) => {
         corner?: Item
     }>(null)
     const activeItems = useRef<Item[]>([])
+    const cursorAngle = useRef<number>(null)
     const data = useRef<{
         pivot: Point
         pivotOrigin: Point
@@ -212,21 +178,32 @@ const ControlsTool: React.FC = ({ children }) => {
     }
 
     const showCursor = (global = false) => {
-        clearCursor()
-        clearGlobalCursor()
-
         if (!cursor.current) return
 
-        const index = cursor.current.corner.position.subtract(
-            canvas.project.controls.position
-        ).corner
+        const angle =
+            ((Math.round(
+                cursor.current.corner.position.subtract(
+                    canvas.project.controls.position
+                ).angle / 5
+            ) *
+                5) %
+                360) %
+            181
 
-        let cursors = resizeCursors
-        if (mode.current === 'rotate') {
-            cursors = rotateCursors
+        if (cursorAngle.current !== angle) {
+            clearCursor([Rotate, Resize])
+            clearGlobalCursor(Resize, cursorAngle.current)
+
+            const cursorIcon = mode.current === 'rotate' ? Rotate : Resize
+
+            global
+                ? setGlobalCursor(cursorIcon, angle)
+                : setCursor(cursorIcon, angle)
+
+            clearGlobalCursor(Rotate, cursorAngle.current)
         }
 
-        global ? setGlobalCursor(cursors[index]) : setCursor(cursors[index])
+        cursorAngle.current = angle
     }
 
     useEffect(() => {
@@ -290,7 +267,7 @@ const ControlsTool: React.FC = ({ children }) => {
 
             transform(e, false)
 
-            clearGlobalCursor()
+            clearGlobalCursor([Rotate, Resize])
             tool.activeMain()
 
             if (e.item) {
@@ -325,7 +302,7 @@ const ControlsTool: React.FC = ({ children }) => {
                 }
 
                 if (!corner.current) {
-                    clearCursor()
+                    clearCursor([Rotate, Resize])
                 }
             }
         )
@@ -343,6 +320,8 @@ const ControlsTool: React.FC = ({ children }) => {
                     mode.current = 'rotate'
                 }
 
+                cursorAngle.current = null
+
                 showCursor()
             }
         }
@@ -351,7 +330,7 @@ const ControlsTool: React.FC = ({ children }) => {
             if (!tool.actived) {
                 cursor.current = null
             }
-            clearCursor()
+            clearCursor([Rotate, Resize])
         }
 
         controls.onMouseDown = (e: MouseEvent & { target: ControlItem }) => {
