@@ -2,6 +2,7 @@ import { PaperScope, Path, ToolEvent } from '@yomyer/paper'
 import { round } from '../../utils/mathUtils'
 import { YomtorTheme } from '../../styles/createTheme'
 import { createObjectTool } from '../../utils/createObjectTool'
+import Rectangle from '../icons/cursor/Rectangle'
 
 export default createObjectTool(
     (e: ToolEvent, canvas: PaperScope, theme: YomtorTheme) =>
@@ -22,5 +23,7 @@ export default createObjectTool(
             name: 'Rectangle',
             actived: true
         }),
-    'Rectangle'
+    'Rectangle',
+    'r',
+    Rectangle
 )

@@ -12,6 +12,12 @@ import {
 import React, { useEffect, useContext, useState, useRef } from 'react'
 import EditorContext from '../EditorContext'
 
+import {
+    clearCursor,
+    clearGlobalCursor,
+    setCursor,
+    setGlobalCursor
+} from '../../utils/cursorUtils'
 import { useHotkeys } from '../../uses/useHokeys'
 import { sign, normalize, round, abs } from '../../utils/mathUtils'
 import { rotateDelta, scaleWithRotate } from '../../utils/trigonometryUtils'
@@ -20,13 +26,7 @@ import Resize from '../icons/cursor/Resize'
 
 const ControlsTool: React.FC = ({ children }) => {
     const [tool, setTool] = useState<Tool>()
-    const {
-        canvas,
-        clearCursor,
-        clearGlobalCursor,
-        setCursor,
-        setGlobalCursor
-    } = useContext(EditorContext)
+    const { canvas } = useContext(EditorContext)
     const mode = useRef<'resize' | 'rotate'>('resize')
     const cursor = useRef<{
         point?: Point
@@ -68,7 +68,6 @@ const ControlsTool: React.FC = ({ children }) => {
                 visible: true,
                 actived: true
             })
-
             return clone
         })
     }
@@ -174,17 +173,19 @@ const ControlsTool: React.FC = ({ children }) => {
             canvas.fire('object:rotating', e)
         }
 
-        showCursor(true)
+        showCursor(true, canvas.project.activeItems.length > 1 && delta)
     }
 
-    const showCursor = (global = false) => {
+    const showCursor = (global = false, angle = 0) => {
         if (!cursor.current) return
 
-        const angle =
+        angle =
             ((Math.round(
-                cursor.current.corner.position.subtract(
+                (cursor.current.corner.position.subtract(
                     canvas.project.controls.position
-                ).angle / 5
+                ).angle +
+                    angle) /
+                    5
             ) *
                 5) %
                 360) %
@@ -374,6 +375,8 @@ const ControlsTool: React.FC = ({ children }) => {
                 point: e.target.position,
                 corner: e.target
             }
+
+            cursorAngle.current = null
 
             showCursor(true)
 

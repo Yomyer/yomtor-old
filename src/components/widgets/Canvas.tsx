@@ -4,6 +4,7 @@ import { PaperScope } from '@yomyer/paper'
 import { YomtorTheme } from '../../styles/createTheme'
 import EditorContext from '../EditorContext'
 import Default from '../icons/cursor/Default'
+import { cursorWithScope, setCursor } from '../../utils/cursorUtils'
 
 type Props = {
     actions?: React.ReactNode
@@ -35,7 +36,7 @@ const useStyles = createUseStyles<
 const Canvas: React.FC<Props> = ({ children }) => {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const { canvas, initCanvas, setCursor } = useContext(EditorContext)
+    const { canvas, initCanvas } = useContext(EditorContext)
     const [hasArtboards, setHasArtboards] = useState(false)
 
     const styles = useStyles({ hasArtboards })
@@ -45,13 +46,15 @@ const Canvas: React.FC<Props> = ({ children }) => {
         scope.setup(canvasRef.current)
 
         initCanvas(scope)
-        setCursor(Default)
+        cursorWithScope(scope)
     }, [])
 
     useEffect(() => {
         if (!canvas) {
             return
         }
+
+        setCursor(Default)
 
         canvas.on(['object:created', 'object:deleted'], () => {
             setHasArtboards(!!canvas.project.artboards.length)

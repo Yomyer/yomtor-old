@@ -1,4 +1,4 @@
-import Cursor from '../Cursor'
+import Cursor from '../../../utils/cursorUtils'
 
 const Cross: Cursor = {
     d:
@@ -6,8 +6,8 @@ const Cross: Cursor = {
     id: 'cross',
     stroke: '#FFFFFF',
     fill: '#000000',
-    x: '15',
-    y: '15'
+    x: '16',
+    y: '14'
 }
 
 export default Cross

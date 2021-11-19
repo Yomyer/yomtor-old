@@ -4,17 +4,12 @@ import Input from '../override/Input'
 import Field, { FieldProps } from './Field'
 import { createUseStyles, useTheme } from 'react-jss'
 import Draggable from 'react-draggable'
-import {
-    clearCursor,
-    clearGlobalCursor,
-    setCursor,
-    setGlobalCursor
-} from '../../utils/cursorUtils'
+import { clearGlobalCursor, setGlobalCursor } from '../../utils/cursorUtils'
 import Ink from 'react-ink'
 import useLongPress from '../../uses/useLongPress'
 import { clearProps } from '../../utils'
 import { YomtorTheme } from '../../styles/createTheme'
-import { ResizeEW } from '../icons/cursor'
+import Resize from '../icons/cursor/Resize'
 
 type Props = {
     prefix?: string
@@ -124,6 +119,7 @@ const NumericField: React.FC<Props> = ({
     const [defaultValue, setDefatulValue] = useState('0')
     const [showArrows, setShowArrows] = useState(false)
     const [focused, setFocused] = useState(false)
+    const [dragging, setDraggin] = useState(false)
     const theme = useTheme<YomtorTheme>()
     const validatorProps = { zero, abs, integrer }
 
@@ -213,15 +209,17 @@ const NumericField: React.FC<Props> = ({
     }
 
     const onDragStart = () => {
-        setGlobalCursor(ResizeEW)
+        setResizeCursor()
+        setDraggin(true)
     }
 
     const onDragStop = (e: any) => {
-        clearGlobalCursor()
+        clearGlobalCursor(Resize)
 
         e.target.value = multiple ? '0' : props.value
         e.target.name = props.name
 
+        setDraggin(false)
         onUpdate(e)
     }
 
@@ -233,6 +231,16 @@ const NumericField: React.FC<Props> = ({
     const handleDecrease = (e: any) => {
         e.target = input.current
         update(e, -1)
+    }
+
+    const setResizeCursor = () => {
+        setGlobalCursor(Resize)
+    }
+
+    const clearResizeCursor = () => {
+        if (!dragging) {
+            clearGlobalCursor(Resize)
+        }
     }
 
     return (
@@ -251,8 +259,8 @@ const NumericField: React.FC<Props> = ({
                     >
                         <div
                             className={styles.prefix}
-                            onMouseEnter={() => setCursor(ResizeEW)}
-                            onMouseLeave={clearCursor}
+                            onMouseEnter={setResizeCursor}
+                            onMouseLeave={clearResizeCursor}
                         >
                             {prefix}
                         </div>
@@ -277,8 +285,8 @@ const NumericField: React.FC<Props> = ({
                     >
                         <div
                             className={styles.suffix}
-                            onMouseEnter={() => setCursor(ResizeEW)}
-                            onMouseLeave={clearCursor}
+                            onMouseEnter={setResizeCursor}
+                            onMouseLeave={clearResizeCursor}
                         >
                             {suffix}
                         </div>

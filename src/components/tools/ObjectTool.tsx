@@ -10,10 +10,13 @@ import React, {
 import { useHotkeys } from '../../uses/useHokeys'
 import EditorContext from '../EditorContext'
 import { YomtorTheme } from '../../styles/createTheme'
+import Cursor, { setCursor, clearCursor } from '../../utils/cursorUtils'
+import Cross from '../icons/cursor/Cross'
 
 type Props = {
     onInserMode?: (status: boolean) => void
     hotKey?: string
+    cursor?: Cursor
     onPhantom: (
         event: ToolEvent,
         canvas: PaperScope,
@@ -33,6 +36,7 @@ const ObjectTool: React.FC<Props> = ({
     onPhantom,
     onObject,
     hotKey,
+    cursor,
     ref
 }) => {
     const { canvas, theme } = useContext(EditorContext)
@@ -64,6 +68,14 @@ const ObjectTool: React.FC<Props> = ({
 
     useEffect(() => {
         if (!tool) return
+
+        tool.onActivate = () => {
+            setCursor(Cross, 0, cursor)
+        }
+
+        tool.onDeactivate = () => {
+            clearCursor(Cross, 0, cursor)
+        }
 
         tool.onMouseDrag = (e: ToolEvent) => {
             if (phantom.current) phantom.current.remove()

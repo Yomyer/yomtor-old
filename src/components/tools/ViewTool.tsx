@@ -18,20 +18,19 @@ import {
 } from '@yomyer/paper'
 import Grabbing from '../icons/cursor/Grabbing'
 import Grab from '../icons/cursor/Grab'
-
+import {
+    setGlobalCursor,
+    setCursor,
+    clearCursor,
+    clearGlobalCursor
+} from '../../utils/cursorUtils'
 type Props = {
     factor?: number
     pixelGrid?: boolean
 }
 
 const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
-    const {
-        canvas,
-        setGlobalCursor,
-        setCursor,
-        clearCursor,
-        clearGlobalCursor
-    } = useContext(EditorContext)
+    const { canvas } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const offset = useRef<Point>()
     const scrollDragDirection = useRef<Point>()
@@ -119,9 +118,13 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
         canvas.view.on('mousedown', (e: ToolEvent) => {
             downPoint.current = e.point
         })
+    }, [canvas])
+
+    useEffect(() => {
+        if (!tool) return
 
         canvas.view.on('frame', (e: any) => {
-            if (!(e.count % 1)) {
+            if (!(e.count % 1) && !tool.actived) {
                 setTimeout(() => {
                     if (scrollDragDirection.current) {
                         const delta = scrollDragDirection.current
@@ -145,10 +148,6 @@ const ViewTool: React.FC<Props> = ({ children, factor, pixelGrid }) => {
                 })
             }
         })
-    }, [canvas])
-
-    useEffect(() => {
-        if (!tool) return
 
         tool.onMouseDown = () => {
             setGlobalCursor(Grabbing)

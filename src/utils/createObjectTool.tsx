@@ -2,9 +2,11 @@ import { Item, PaperScope, Tool, ToolEvent } from '@yomyer/paper'
 import React, { ForwardRefRenderFunction } from 'react'
 import ObjectTool from '../components/tools/ObjectTool'
 import { YomtorTheme } from '../styles/createTheme'
+import Cursor from './cursorUtils'
 
 type Props = {
     hotKey?: string
+    cursor?: Cursor
     onInserMode?: (status: boolean) => void
     children?: JSX.Element
 }
@@ -21,7 +23,8 @@ export const createObjectTool = (
         theme: YomtorTheme
     ) => Item,
     displayName: string,
-    hotKey?: string
+    hotKey?: string,
+    cursor?: Cursor
 ) => {
     const Component: ForwardRefRenderFunction<Tool, Props> = (
         { children, ...props },
@@ -29,6 +32,7 @@ export const createObjectTool = (
     ) => {
         if (!props.hotKey) {
             props.hotKey = hotKey
+            props.cursor = cursor
         }
 
         return (

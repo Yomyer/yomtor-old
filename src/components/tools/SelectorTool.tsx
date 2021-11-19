@@ -15,14 +15,16 @@ import React, {
     useRef,
     useState
 } from 'react'
+import { setCursor, clearCursor } from '../../utils/cursorUtils'
 import { useHotkeys, HotKeysEvent } from '../../uses/useHokeys'
 import EditorContext from '../EditorContext'
 import Clone from '../icons/cursor/Clone'
 import Default from '../icons/cursor/Default'
 import ControlsTool from './ControlsTool'
+import { round } from '../../utils/mathUtils'
 
 const SelectorTool: React.FC = (/* { children } */) => {
-    const { canvas, theme, setCursor, clearCursor } = useContext(EditorContext)
+    const { canvas, theme } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
     const hightlight = useRef<Item>(null)
     const selector = useRef<Group>(null)
@@ -34,6 +36,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
     const moved = useRef<boolean>(false)
     const selectItems = useRef<Item[]>(null)
     const mouseEvent = useRef<ToolEvent>(null)
+    const positionItems = useRef<Point[]>([])
 
     const compareToItemList = (a: Item[], b: Item[]): boolean => {
         return isEqual(
@@ -50,6 +53,9 @@ const SelectorTool: React.FC = (/* { children } */) => {
     }
     const updateAtiveItems = () => {
         activedItems.current = [...canvas.project.activeItems]
+        positionItems.current = activedItems.current.map((item) =>
+            item.position.clone()
+        )
     }
 
     const setBeforePositions = () => {
@@ -118,7 +124,11 @@ const SelectorTool: React.FC = (/* { children } */) => {
             hightlight.current =
                 ((item as Path).pathData &&
                     new canvas.Path((item as Path).pathData)) ||
-                new canvas.Path.Rectangle(item.bounds)
+                new canvas.Path.Rectangle({
+                    position: item.activeInfo.center,
+                    size: item.activeInfo,
+                    rotation: item.angle
+                })
 
             hightlight.current.set({
                 strokeColor: theme.palette.canvas.highlight.border,
@@ -221,9 +231,17 @@ const SelectorTool: React.FC = (/* { children } */) => {
         }
     }
     const move = useCallback(
-        (e: any) => {
-            canvas.project.activeItems.forEach((item) => {
-                item.position = item.position.add(e.delta)
+        (e: ToolEvent | HotKeysEvent) => {
+            canvas.project.activeItems.forEach((item, index) => {
+                let position = item.position.add(e.delta)
+
+                if (e instanceof ToolEvent) {
+                    position = positionItems.current[index].add(
+                        round(e.point.subtract(e.downPoint))
+                    )
+                }
+
+                item.position = position
             })
 
             if (mode.current === 'move') {
@@ -360,7 +378,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 e.downPoint.y - e.point.y
             )
 
-            if (distance < 2) {
+            if (distance < 2 / canvas.view.zoom) {
                 return
             }
 
@@ -377,6 +395,15 @@ const SelectorTool: React.FC = (/* { children } */) => {
 
         tool.onMouseMove = (e: ToolEvent) => {
             hightlightController(e)
+            if (
+                e.modifiers.alt &&
+                mouseEvent.current &&
+                mouseEvent.current.item
+            ) {
+                setCursor(Default, 0, Clone)
+            } else {
+                clearCursor(Default, 0, Clone)
+            }
         }
 
         tool.onMouseUp = (e: ToolEvent) => {
@@ -463,7 +490,9 @@ const SelectorTool: React.FC = (/* { children } */) => {
     useHotkeys(
         '*+alt',
         () => {
-            setCursor(Default, 0, Clone)
+            if (mouseEvent.current && mouseEvent.current.item) {
+                setCursor(Default, 0, Clone)
+            }
         },
         () => {
             clearCursor(Default, 0, Clone)

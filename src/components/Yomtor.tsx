@@ -8,10 +8,7 @@ import { isUndefined } from 'lodash'
 import { ThemeProvider } from 'react-jss'
 import { createTheme } from '../styles'
 import { PaperScope } from '@yomyer/paper'
-import CursorController from './icons/CursorController'
 import EditorContext from './EditorContext'
-import Cursor from './icons/Cursor'
-import Default from './icons/cursor/Default'
 
 type Props = {
     settings?: Settings
@@ -26,49 +23,9 @@ const Yomtor: React.FC<Props> = ({
     overrideSettings
 }) => {
     const [canvas, setCanvas] = useState<PaperScope | null>(null)
-    const [action, setAction] = useState<{
-        action: Cursor | Cursor[]
-        rotation: number
-        subAction?: Cursor
-        global?: boolean
-        clear?: boolean
-    }>({
-        action: Default,
-        rotation: 0
-    })
 
     const initCanvas = (c: PaperScope): void => {
         setCanvas(c)
-    }
-
-    const setCursor = (
-        action: Cursor,
-        rotation = 0,
-        subAction?: Cursor
-    ): void => {
-        setAction({ action, rotation, subAction, global: false, clear: false })
-    }
-    const setGlobalCursor = (
-        action: Cursor,
-        rotation = 0,
-        subAction?: Cursor
-    ): void => {
-        setAction({ action, rotation, subAction, global: true })
-    }
-
-    const clearCursor = (
-        action: Cursor | Cursor[],
-        rotation = 0,
-        subAction?: Cursor
-    ): void => {
-        setAction({ action, rotation, subAction, global: false, clear: true })
-    }
-    const clearGlobalCursor = (
-        action: Cursor | Cursor[],
-        rotation = 0,
-        subAction?: Cursor
-    ): void => {
-        setAction({ action, rotation, subAction, global: true, clear: true })
     }
 
     return (
@@ -84,16 +41,10 @@ const Yomtor: React.FC<Props> = ({
                         canvas,
                         initCanvas,
                         settings,
-                        theme,
-                        setCursor,
-                        setGlobalCursor,
-                        clearGlobalCursor,
-                        clearCursor
+                        theme
                     }}
                 >
                     {children}
-
-                    <CursorController cursor={action} />
                 </EditorContext.Provider>
             </ThemeProvider>
         </Provider>

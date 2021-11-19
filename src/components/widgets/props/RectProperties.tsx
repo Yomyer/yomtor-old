@@ -147,7 +147,6 @@ const RectProperties: React.FC = () => {
                                     ? alter - item.activeInfo.topLeft.y
                                     : 0
                             )
-
                             item.position = item.position.add(delta)
 
                             break
