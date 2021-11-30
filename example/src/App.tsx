@@ -20,7 +20,8 @@ import {
     Color,
     // colorWord,
     ViewTool,
-    SnapTool
+    SnapTool,
+    GroupTool
 } from 'yomtor'
 
 // const ENDPOINT = 'http://localhost:4000'
@@ -169,6 +170,10 @@ const App = () => {
                             <ArtboardTool>
                                 <button>Artboard</button>
                             </ArtboardTool>
+
+                            <GroupTool>
+                                <button>Group :D</button>
+                            </GroupTool>
                         </Toolbar>
                     </Grid>
                     <Grid item className={canvas}>

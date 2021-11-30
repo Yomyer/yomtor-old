@@ -1,4 +1,11 @@
-import { Item, KeyEvent, PaperScope, Tool, ToolEvent } from '@yomyer/paper'
+import {
+    Artboard,
+    Item,
+    KeyEvent,
+    PaperScope,
+    Tool,
+    ToolEvent
+} from '@yomyer/paper'
 import React, {
     useContext,
     useEffect,
@@ -94,7 +101,22 @@ const ObjectTool: React.FC<Props> = ({
                 phantom.current.remove()
                 canvas.project.deactivateAll()
 
-                onObject(e, canvas, theme)
+                const item = onObject(e, canvas, theme)
+
+                if (!(item instanceof Artboard)) {
+                    const artboard = canvas.project.hitTest(e.downPoint, {
+                        fill: true,
+                        stroke: false,
+                        legacy: true,
+                        class: Artboard
+                    })
+                    if (artboard) {
+                        artboard.item.insertChild(
+                            artboard.item.children.length + 1,
+                            item
+                        )
+                    }
+                }
 
                 canvas.fire('object:created', e)
             }

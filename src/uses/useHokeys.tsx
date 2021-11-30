@@ -169,6 +169,10 @@ export function useHotkeys<T extends Element>(
                 return !filterPreventDefault
             }
 
+            if (filterPreventDefault) {
+                keyboardEvent.preventDefault()
+            }
+
             if (
                 (isKeyboardEventTriggeredByInput(keyboardEvent) &&
                     !tagFilter(keyboardEvent, enableOnTags)) ||

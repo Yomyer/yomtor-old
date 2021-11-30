@@ -20,11 +20,12 @@ export default createObjectTool(
             fillColor: 'white',
             name: 'Artboard',
             actived: true,
+            clipped: true,
             children: [
                 new Path.Rectangle({
                     from: round(e.downPoint),
                     to: round(e.point),
-                    fillColor: 'yellow'
+                    fillColor: 'blue'
                 })
             ]
         }),

@@ -25,8 +25,8 @@ import Rotate from '../icons/cursor/Rotate'
 import Resize from '../icons/cursor/Resize'
 
 const ControlsTool: React.FC = ({ children }) => {
-    const [tool, setTool] = useState<Tool>()
     const { canvas } = useContext(EditorContext)
+    const [tool, setTool] = useState<Tool>()
     const mode = useRef<'resize' | 'rotate'>('resize')
     const cursor = useRef<{
         point?: Point

@@ -1,4 +1,5 @@
 import {
+    Artboard,
     Group,
     Item,
     KeyEvent,
@@ -37,6 +38,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
     const selectItems = useRef<Item[]>(null)
     const mouseEvent = useRef<ToolEvent>(null)
     const positionItems = useRef<Point[]>([])
+    const startInArtboard = useRef<boolean>(false)
 
     const compareToItemList = (a: Item[], b: Item[]): boolean => {
         return isEqual(
@@ -127,7 +129,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 new canvas.Path.Rectangle({
                     position: item.activeInfo.center,
                     size: item.activeInfo,
-                    rotation: item.angle
+                    rotation: item.activeInfo.angle
                 })
 
             hightlight.current.set({
@@ -163,7 +165,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 inside: e.modifiers.alt && selectRect.current.bounds,
                 overlapping: !e.modifiers.alt && selectRect.current.bounds,
                 match: (item: Item) => {
-                    return !item.guide && !(item instanceof Group)
+                    return !item.guide && !(item instanceof Artboard)
                 }
             }
             const artboardMatch = {
@@ -243,6 +245,39 @@ const SelectorTool: React.FC = (/* { children } */) => {
 
                 item.position = position
             })
+
+            if (e instanceof ToolEvent) {
+                const artboard = canvas.project.hitTest(e.point, {
+                    fill: true,
+                    stroke: false,
+                    legacy: true,
+                    class: Artboard
+                })
+
+                canvas.project.activeItems.forEach((item) => {
+                    if (!(item instanceof Artboard)) {
+                        if (
+                            (artboard && !item.artboard) ||
+                            (artboard && artboard.item !== item.artboard)
+                        ) {
+                            artboard.item.insertChild(
+                                artboard.item.children.length + 1,
+                                item
+                            )
+                        } else if (
+                            !artboard &&
+                            item.artboard &&
+                            (startInArtboard.current ||
+                                !item.intersects(item.artboard))
+                        ) {
+                            item.artboard.parent.insertChild(
+                                item.artboard.parent.children.length + 1,
+                                item
+                            )
+                        }
+                    }
+                })
+            }
 
             if (mode.current === 'move') {
                 canvas.fire('object:moving', e)
@@ -357,6 +392,16 @@ const SelectorTool: React.FC = (/* { children } */) => {
                     }
 
                     updateAtiveItems()
+
+                    startInArtboard.current = !!canvas.project.hitTest(
+                        e.downPoint,
+                        {
+                            fill: true,
+                            stroke: false,
+                            legacy: true,
+                            class: Artboard
+                        }
+                    )
                 } else if (activedItems.current.length && !e.modifiers.shift) {
                     canvas.fire(`selection:cleared`, e)
                     activedItems.current = []
@@ -490,7 +535,11 @@ const SelectorTool: React.FC = (/* { children } */) => {
     useHotkeys(
         '*+alt',
         () => {
-            if (mouseEvent.current && mouseEvent.current.item) {
+            if (
+                mouseEvent.current &&
+                mouseEvent.current.item &&
+                !selectRect.current
+            ) {
                 setCursor(Default, 0, Clone)
             }
         },
