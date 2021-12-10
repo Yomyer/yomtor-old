@@ -1,4 +1,4 @@
-export * from './widgets'
+export * from './panels'
 export * from './containers'
 export { default as Yomtor } from './Yomtor'
 export * from './EditorContext'

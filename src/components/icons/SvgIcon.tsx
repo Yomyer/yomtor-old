@@ -9,6 +9,9 @@ const useStyles = createUseStyles<'root', IconProps>(
             fontSize: 'inherit',
             boxSizing: 'content-box',
             fill: 'currentcolor',
+            fillOpacity: 1,
+            stroke: 'currentcolor',
+            strokeOpacity: 0,
             width: '1em !important',
             height: '1em  !important',
             display: 'inline-block',
@@ -20,18 +23,19 @@ const useStyles = createUseStyles<'root', IconProps>(
     { link: false }
 )
 
-const SvgIcon: React.FC<IconProps> = ({ children, ...props }) => {
+const SvgIcon: React.FC<IconProps> = ({ children, viewport, ...props }) => {
     const classes = useStyles(props)
 
     return (
-        <svg viewBox='0 0 24 24' className={classes.root}>
+        <svg viewBox={viewport} className={classes.root}>
             {children}
         </svg>
     )
 }
 
 SvgIcon.defaultProps = {
-    rotate: 0
+    rotate: 0,
+    viewport: '0 0 24 24'
 }
 
 export default SvgIcon

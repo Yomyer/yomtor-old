@@ -20,8 +20,7 @@ export default createObjectTool(
             to: round(e.point),
             strokeColor: theme.palette.path.default.border,
             fillColor: theme.palette.path.default.background,
-            name: 'Rectangle',
-            actived: true
+            name: 'Rectangle'
         }),
     'Rectangle',
     'r',

@@ -288,7 +288,7 @@ const ControlsTool: React.FC = ({ children }) => {
             controls.clearInfo()
 
             canvas.fire(
-                mode.current === 'resize' ? 'object:scaled' : 'object:rotated',
+                mode.current === 'resize' ? 'object:resized' : 'object:rotated',
                 e
             )
         }
@@ -309,22 +309,22 @@ const ControlsTool: React.FC = ({ children }) => {
         )
 
         controls.onMouseEnter = (e: MouseEvent & { target: ControlItem }) => {
-            if (!tool.actived && tool.mainActived) {
-                cursor.current = {
-                    angle: 0,
-                    point: e.target.position,
-                    corner: e.target
-                }
-                mode.current = e.modifiers.meta ? 'rotate' : 'resize'
+            if (tool.actived && !tool.mainActived) return
 
-                if (e.target.name.startsWith('rotate')) {
-                    mode.current = 'rotate'
-                }
-
-                cursorAngle.current = null
-
-                showCursor()
+            cursor.current = {
+                angle: 0,
+                point: e.target.position,
+                corner: e.target
             }
+            mode.current = e.modifiers.meta ? 'rotate' : 'resize'
+
+            if (e.target.name.startsWith('rotate')) {
+                mode.current = 'rotate'
+            }
+
+            cursorAngle.current = null
+
+            showCursor()
         }
 
         controls.onMouseLeave = () => {
@@ -337,13 +337,18 @@ const ControlsTool: React.FC = ({ children }) => {
         controls.onMouseDown = (e: MouseEvent & { target: ControlItem }) => {
             if (!tool.mainActived) return
 
+            tool.activate()
+
             const cornerName = e.target.corner
             const controls = canvas.project.controls
             activeItems.current = [...canvas.project.activeItems]
 
-            const angle = controls.angle
+            const angle = controls.inheritedAngle
 
-            const matrix = new Matrix().rotate(-controls.angle, controls.center)
+            const matrix = new Matrix().rotate(
+                -controls.inheritedAngle,
+                controls.center
+            )
             const center = controls.center
             const corner: Point = controls[cornerName]
             const handler: Point = controls[cornerName]
@@ -379,8 +384,6 @@ const ControlsTool: React.FC = ({ children }) => {
             cursorAngle.current = null
 
             showCursor(true)
-
-            tool.activate()
 
             lastPoint.current = e.point
         }

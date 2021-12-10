@@ -201,10 +201,17 @@ const NumericField: React.FC<Props> = ({
 
     const onDrag = (e: any, ui: any) => {
         if (!ui.deltaX) return
-        e.target.value = multiple ? '0' : props.value
-        e.target.name = props.name
 
-        update(e, ui.deltaX)
+        update(
+            {
+                ...e,
+                target: {
+                    value: multiple ? '0' : props.value,
+                    name: props.name
+                }
+            },
+            ui.deltaX
+        )
         input.current.focus()
     }
 
@@ -216,11 +223,14 @@ const NumericField: React.FC<Props> = ({
     const onDragStop = (e: any) => {
         clearGlobalCursor(Resize)
 
-        e.target.value = multiple ? '0' : props.value
-        e.target.name = props.name
-
         setDraggin(false)
-        onUpdate(e)
+        onUpdate({
+            ...e,
+            target: {
+                value: multiple ? '0' : props.value,
+                name: props.name
+            }
+        })
     }
 
     const handleIncrease = (e: any) => {

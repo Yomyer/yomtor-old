@@ -6,8 +6,8 @@ import { Grid, Toolbar, makeStyles, useMediaQuery } from '@material-ui/core'
 import {
     OvalTool,
     AligmentProperties,
-    Canvas,
-    Properties,
+    CanvasPanel,
+    PropertiesPanel,
     RectProperties,
     Yomtor,
     ZoomTool,
@@ -21,14 +21,15 @@ import {
     // colorWord,
     ViewTool,
     SnapTool,
-    GroupTool
+    GroupTool,
+    ObjectsPanel
 } from 'yomtor'
 
 // const ENDPOINT = 'http://localhost:4000'
 const maxWidth = 240
 
 const useStyles = makeStyles((theme) => ({
-    aside: {
+    start: {
         maxWidth: maxWidth,
         flexBasis: maxWidth,
         minWidth: maxWidth,
@@ -37,10 +38,19 @@ const useStyles = makeStyles((theme) => ({
         borderColor: theme.palette.divider,
         borderRightStyle: 'solid'
     },
+    end: {
+        maxWidth: maxWidth,
+        flexBasis: maxWidth,
+        minWidth: maxWidth,
+        background: theme.palette.background.paper,
+        borderWidth: '1px',
+        borderColor: theme.palette.divider,
+        borderRightStyle: 'solid'
+    },
     main: {
         height: '100%'
     },
-    canvas: {
+    canvasPanelCanvasPanel: {
         flexGrow: 1
     }
 }))
@@ -91,7 +101,7 @@ const App = () => {
     const [socket, setSocket] = useState<Socket>(null)
     const [players, setPlayers] = useState<Player[]>([])
     */
-    const { aside, main, canvas } = useStyles()
+    const { start, end, main, canvasPanelCanvasPanel } = useStyles()
 
     const settings = {
         colors: [new Color('#000'), new Color('#000')]
@@ -144,11 +154,11 @@ const App = () => {
     return (
         <Yomtor settings={settings} theme={theme}>
             <Grid container wrap='nowrap' className={main}>
-                <Grid item xs={3} className={aside}>
-                    <Properties>
+                <Grid item xs={3} className={start}>
+                    <PropertiesPanel>
                         <AligmentProperties />
                         <RectProperties />
-                    </Properties>
+                    </PropertiesPanel>
                 </Grid>
                 <Grid
                     container
@@ -176,8 +186,8 @@ const App = () => {
                             </GroupTool>
                         </Toolbar>
                     </Grid>
-                    <Grid item className={canvas}>
-                        <Canvas>
+                    <Grid item className={canvasPanelCanvasPanel}>
+                        <CanvasPanel>
                             <ZoomTool />
                             <SelectorTool />
                             <ViewTool />
@@ -191,8 +201,11 @@ const App = () => {
                                 onSelected={onSelected}
                             />
                             */}
-                        </Canvas>
+                        </CanvasPanel>
                     </Grid>
+                </Grid>
+                <Grid item xs={3} className={end}>
+                    <ObjectsPanel />
                 </Grid>
             </Grid>
         </Yomtor>

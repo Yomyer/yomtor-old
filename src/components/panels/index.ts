@@ -1,0 +1,5 @@
+export { default as CanvasPanel } from './CanvasPanel'
+export { default as PropertiesPanel } from './PropertiesPanel'
+export { default as ObjectsPanel } from './ObjectsPanel'
+export * from './tree'
+export * from './props'

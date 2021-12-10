@@ -173,7 +173,7 @@ const RectProperties: React.FC = () => {
             if (['width', 'height'].includes(name)) {
                 canvas.fire(
                     ['keypress', 'mouseup'].includes(e.type)
-                        ? 'object:scaled'
+                        ? 'object:resized'
                         : 'object:scaling',
                     e
                 )
@@ -209,8 +209,9 @@ const RectProperties: React.FC = () => {
         canvas.on('selection:updated', () => updateRect())
         canvas.on('selection:created', () => updateRect())
         canvas.on('selection:cleared', () => updateRect())
+
         canvas.on('object:moved', () => updateRect(0))
-        canvas.on('object:scaled', () => updateRect(0))
+        canvas.on('object:resized', () => updateRect(0))
         canvas.on('object:rotated', () => updateRect())
 
         canvas.on('object:moving', () => updateRect(0))

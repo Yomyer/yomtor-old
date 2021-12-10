@@ -3,6 +3,7 @@ import SvgIcon from '../components/icons/SvgIcon'
 
 export type IconProps = {
     rotate?: number
+    viewport?: string
 }
 
 export const createSvgIcon = (path: JSX.Element, displayName: string) => {

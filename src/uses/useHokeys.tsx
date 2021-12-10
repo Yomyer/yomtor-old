@@ -169,10 +169,6 @@ export function useHotkeys<T extends Element>(
                 return !filterPreventDefault
             }
 
-            if (filterPreventDefault) {
-                keyboardEvent.preventDefault()
-            }
-
             if (
                 (isKeyboardEventTriggeredByInput(keyboardEvent) &&
                     !tagFilter(keyboardEvent, enableOnTags)) ||
@@ -209,6 +205,11 @@ export function useHotkeys<T extends Element>(
                             keyboardEvent,
                             hotkeysEvent
                         )
+
+                        if (filterPreventDefault) {
+                            keyboardEvent.preventDefault()
+                        }
+
                         if (response !== undefined) {
                             return response
                         }
@@ -229,6 +230,11 @@ export function useHotkeys<T extends Element>(
                         ).length
                     ) {
                         const response = callbackUp(keyboardEvent, hotkeysEvent)
+
+                        if (filterPreventDefault) {
+                            keyboardEvent.preventDefault()
+                        }
+
                         if (response !== undefined) {
                             return response
                         }

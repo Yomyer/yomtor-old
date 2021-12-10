@@ -33,7 +33,7 @@ const useStyles = createUseStyles<
     }
 }))
 
-const Canvas: React.FC<Props> = ({ children }) => {
+const CanvasPanel: React.FC<Props> = ({ children }) => {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const { canvas, initCanvas } = useContext(EditorContext)
@@ -78,4 +78,4 @@ const Canvas: React.FC<Props> = ({ children }) => {
     )
 }
 
-export default Canvas
+export default CanvasPanel

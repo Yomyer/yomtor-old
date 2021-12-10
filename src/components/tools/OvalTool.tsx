@@ -19,8 +19,7 @@ export default createObjectTool(
             to: round(e.point),
             strokeColor: theme.palette.path.default.border,
             fillColor: theme.palette.path.default.background,
-            name: 'Oval',
-            actived: true
+            name: 'Oval'
         }),
     'Oval',
     'o'

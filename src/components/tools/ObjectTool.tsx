@@ -118,6 +118,7 @@ const ObjectTool: React.FC<Props> = ({
                     }
                 }
 
+                item.actived = true
                 canvas.fire('object:created', e)
             }
 

@@ -1,10 +1,12 @@
 import {
     Artboard,
+    ControlItem,
     Group,
     Item,
     KeyEvent,
     Path,
     Point,
+    Rectangle,
     Tool,
     ToolEvent
 } from '@yomyer/paper'
@@ -27,17 +29,15 @@ import { round } from '../../utils/mathUtils'
 const SelectorTool: React.FC = (/* { children } */) => {
     const { canvas, theme } = useContext(EditorContext)
     const [tool, setTool] = useState<Tool>()
-    const hightlight = useRef<Item>(null)
     const selector = useRef<Group>(null)
     const mode = useRef<string>('select')
     const activedItems = useRef<Item[]>([])
     const clonedItems = useRef<Item[]>([])
     const selectRect = useRef<Path>(null)
-    const beforePositions = useRef<Point[]>([])
     const moved = useRef<boolean>(false)
     const selectItems = useRef<Item[]>(null)
     const mouseEvent = useRef<ToolEvent>(null)
-    const positionItems = useRef<Point[]>([])
+    const beforePositions = useRef<{ [key: string]: Point }>({})
     const startInArtboard = useRef<boolean>(false)
 
     const compareToItemList = (a: Item[], b: Item[]): boolean => {
@@ -55,38 +55,45 @@ const SelectorTool: React.FC = (/* { children } */) => {
     }
     const updateAtiveItems = () => {
         activedItems.current = [...canvas.project.activeItems]
-        positionItems.current = activedItems.current.map((item) =>
-            item.position.clone()
-        )
     }
 
     const setBeforePositions = () => {
-        if (!beforePositions.current.length) {
-            beforePositions.current = canvas.project.activeItems.map(
-                (item) => item.position
-            )
-        }
+        beforePositions.current = canvas.project.activeItems.reduce(
+            (positions, item) => {
+                if (!positions[item.uid]) {
+                    positions[item.uid] = item.position.clone()
+                }
+
+                return positions
+            },
+            beforePositions.current
+        )
     }
 
     const cloneController = () => {
         if (mode.current === 'clone') {
+            canvas.project.clearHighlightedItem()
+
             if (!clonedItems.current.length) {
-                updateAtiveItems()
-                clonedItems.current = canvas.project.activeItems.map((item) =>
-                    item.clone()
-                )
+                clonedItems.current = canvas.project.activeItems.map((item) => {
+                    const cloned = item.clone()
+                    beforePositions.current[cloned.uid] =
+                        beforePositions.current[item.uid]
+                    return cloned
+                })
+
                 canvas.project.deactivateAll()
                 clonedItems.current.forEach((item) =>
                     item.set({ actived: true })
                 )
 
-                if (beforePositions.current.length) {
+                if (Object.keys(beforePositions.current).length) {
                     activedItems.current.forEach(
-                        (item, index) =>
-                            (item.position = beforePositions.current[index])
+                        (item) =>
+                            (item.position = beforePositions.current[item.uid])
                     )
 
-                    canvas.fire('object:modified', {
+                    canvas.fire('object:created', {
                         items: activedItems.current
                     })
                 }
@@ -105,15 +112,13 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 })
                 clonedItems.current = []
 
-                canvas.fire('object:modified', {
+                canvas.fire('object:deleted', {
                     items: activedItems.current
                 })
             }
         }
     }
     const hightlightController = (e?: ToolEvent) => {
-        if (hightlight.current) hightlight.current.remove()
-
         if (selectRect.current) return
         if (!e) e = mouseEvent.current
         if (!e) return
@@ -122,24 +127,12 @@ const SelectorTool: React.FC = (/* { children } */) => {
             legacy: e.modifiers.meta
         })
 
-        if (item && !item.actived) {
-            hightlight.current =
-                ((item as Path).pathData &&
-                    new canvas.Path((item as Path).pathData)) ||
-                new canvas.Path.Rectangle({
-                    position: item.activeInfo.center,
-                    size: item.activeInfo,
-                    rotation: item.activeInfo.angle
-                })
-
-            hightlight.current.set({
-                strokeColor: theme.palette.canvas.highlight.border,
-                strokeWidth: 2 / canvas.view.zoom,
-                guide: true
-            })
+        if (item && !clonedItems.current.length) {
+            item.highlighted = true
+        } else {
+            canvas.project.highlightedItem &&
+                (canvas.project.highlightedItem.highlighted = false)
         }
-
-        mouseEvent.current = e
     }
 
     const rectSelectorController = (e: KeyEvent | ToolEvent) => {
@@ -165,6 +158,22 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 inside: e.modifiers.alt && selectRect.current.bounds,
                 overlapping: !e.modifiers.alt && selectRect.current.bounds,
                 match: (item: Item) => {
+                    if (item.artboard && item.artboard.actived) {
+                        return false
+                    }
+
+                    if (item.className === 'Group') {
+                        const children = item.getItems({
+                            class: canvas.Item,
+                            overlapping: selectRect.current.bounds
+                        })
+                        return !!children.length
+                    }
+
+                    if (item.parent && item.parent.className === 'Group') {
+                        return false
+                    }
+
                     return !item.guide && !(item instanceof Artboard)
                 }
             }
@@ -234,13 +243,15 @@ const SelectorTool: React.FC = (/* { children } */) => {
     }
     const move = useCallback(
         (e: ToolEvent | HotKeysEvent) => {
-            canvas.project.activeItems.forEach((item, index) => {
+            canvas.project.activeItems.forEach((item) => {
                 let position = item.position.add(e.delta)
 
                 if (e instanceof ToolEvent) {
-                    position = positionItems.current[index].add(
-                        round(e.point.subtract(e.downPoint))
-                    )
+                    if (beforePositions.current[item.uid]) {
+                        position = beforePositions.current[item.uid].add(
+                            round(e.point.subtract(e.downPoint))
+                        )
+                    }
                 }
 
                 item.position = position
@@ -253,6 +264,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                     legacy: true,
                     class: Artboard
                 })
+                let inserted = false
 
                 canvas.project.activeItems.forEach((item) => {
                     if (!(item instanceof Artboard)) {
@@ -264,6 +276,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                                 artboard.item.children.length + 1,
                                 item
                             )
+                            inserted = item.actived = true
                         } else if (
                             !artboard &&
                             item.artboard &&
@@ -274,9 +287,14 @@ const SelectorTool: React.FC = (/* { children } */) => {
                                 item.artboard.parent.children.length + 1,
                                 item
                             )
+                            inserted = item.actived = true
                         }
                     }
                 })
+
+                if (inserted) {
+                    canvas.fire('object:created')
+                }
             }
 
             if (mode.current === 'move') {
@@ -321,6 +339,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 canvas.fire('selection:created', {
                     ...{ items: canvas.project.activeItems }
                 })
+                setBeforePositions()
                 updateAtiveItems()
             }
             mode.current = ['move', 'clone'].includes(beforeMode)
@@ -331,18 +350,27 @@ const SelectorTool: React.FC = (/* { children } */) => {
         }
 
         tool.onDeactivate = () => {
+            beforePositions.current = {}
             beforeMode = mode.current
             mode.current = 'none'
             cloneController()
+        }
 
-            if (hightlight.current) {
-                hightlight.current.remove()
+        tool.onDoubleClick = (e: ToolEvent) => {
+            if (e.item) {
+                e.item = canvas.project.getItem({
+                    overlapping: new Rectangle(e.point),
+                    actived: true
+                })
+
+                if (e.item) {
+                    canvas.fire('edit', e)
+                }
             }
         }
 
         tool.onMouseDown = (e: ToolEvent) => {
             if (!tool.actived) return
-
             let action = null
             mode.current = 'select'
 
@@ -355,10 +383,6 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 mode.current = 'action'
             }
             if (!action) {
-                if (hightlight.current) {
-                    hightlight.current.remove()
-                }
-
                 const item = canvas.project.getItemByPoint(e.downPoint, {
                     legacy: e.modifiers.meta
                 })
@@ -380,8 +404,6 @@ const SelectorTool: React.FC = (/* { children } */) => {
                         item.actived = false
                     }
 
-                    setBeforePositions()
-
                     mode.current = 'move'
                     if (e.modifiers.alt) {
                         mode.current = 'clone'
@@ -391,6 +413,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
                         canvas.fire(`selection:${updated}`, e)
                     }
 
+                    setBeforePositions()
                     updateAtiveItems()
 
                     startInArtboard.current = !!canvas.project.hitTest(
@@ -439,7 +462,12 @@ const SelectorTool: React.FC = (/* { children } */) => {
         }
 
         tool.onMouseMove = (e: ToolEvent) => {
+            if (e.item instanceof ControlItem) return
+
             hightlightController(e)
+
+            mouseEvent.current = e
+
             if (
                 e.modifiers.alt &&
                 mouseEvent.current &&
@@ -453,7 +481,7 @@ const SelectorTool: React.FC = (/* { children } */) => {
 
         tool.onMouseUp = (e: ToolEvent) => {
             clonedItems.current = []
-            beforePositions.current = []
+            beforePositions.current = {}
             selectItems.current = null
             selectRect.current = null
 
@@ -480,10 +508,9 @@ const SelectorTool: React.FC = (/* { children } */) => {
             }
 
             if (['delete', 'backspace'].includes(e.key)) {
-                let items = canvas.project.activeItems
+                let items = [...canvas.project.activeItems]
 
-                canvas.project.activeItems.forEach((item) => item.remove())
-                canvas.project.deactivateAll()
+                items.forEach((item) => item.remove())
                 canvas.fire('selection:cleared', { items })
 
                 canvas.fire('object:deleted', {
@@ -509,12 +536,6 @@ const SelectorTool: React.FC = (/* { children } */) => {
                 rectSelectorController(e)
             }
         }
-
-        canvas.view.on('zoom', () => {
-            if (!hightlight.current) return
-
-            hightlight.current.strokeWidth = 2 / canvas.view.zoom
-        })
     }, [tool])
 
     useHotkeys(

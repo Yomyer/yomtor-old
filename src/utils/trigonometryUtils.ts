@@ -78,9 +78,11 @@ export const scaleWithRotate = function (
     center?: Point,
     angle?: number
 ) {
+    const oldAngle = item.angle
     center = center || item.bounds.center
     pivot = pivot || center
-    angle = (isUndefined(angle) && item.angle) || 0
+
+    angle = (isUndefined(angle) && item.inheritedAngle) || 0
 
     if (item.angle !== angle) {
         item.angle = 0
@@ -91,4 +93,6 @@ export const scaleWithRotate = function (
     item.rotate(-angle, center)
     item.scale(factor.x, factor.y, pivot)
     item.rotate(angle, center)
+
+    item.angle = oldAngle
 }

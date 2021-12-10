@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Properties: React.FC = ({ children }) => {
+const PropertiesPanel: React.FC = ({ children }) => {
     return (
         <>
             <div>{children}</div>
@@ -8,4 +8,4 @@ const Properties: React.FC = ({ children }) => {
     )
 }
 
-export default Properties
+export default PropertiesPanel
