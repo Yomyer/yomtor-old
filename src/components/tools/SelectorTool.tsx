@@ -129,9 +129,11 @@ const SelectorTool: React.FC = (/* { children } */) => {
 
         if (item && !clonedItems.current.length) {
             item.highlighted = true
+            canvas.fire('hightlight:created')
         } else {
             canvas.project.highlightedItem &&
                 (canvas.project.highlightedItem.highlighted = false)
+            canvas.fire('hightlight:cleared')
         }
     }
 

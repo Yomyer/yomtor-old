@@ -14,7 +14,7 @@ const useStyles = createUseStyles<'root', IconProps>(
             strokeOpacity: 0,
             width: '1em !important',
             height: '1em  !important',
-            display: 'inline-block',
+            display: (props) => (props.hidden ? 'none' : 'inline-block'),
             flexShrink: 0,
             userSelect: 'none',
             transform: (props) => `rotate(${(props.rotate || 0) * 90}deg)`
@@ -35,7 +35,8 @@ const SvgIcon: React.FC<IconProps> = ({ children, viewport, ...props }) => {
 
 SvgIcon.defaultProps = {
     rotate: 0,
-    viewport: '0 0 24 24'
+    viewport: '0 0 24 24',
+    hidden: false
 }
 
 export default SvgIcon

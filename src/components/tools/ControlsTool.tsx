@@ -61,7 +61,8 @@ const ControlsTool: React.FC = ({ children }) => {
         activeHelpers.current = activeItems.current.map((item) => {
             const clone = item
                 .set({
-                    visible: false
+                    visible: false,
+                    highlighted: false
                 })
                 .clone({ keep: true })
             clone.set({

@@ -10,8 +10,7 @@ const useStyles = createUseStyles({
     root: {
         height: '100%',
         width: '100%',
-        overflow: 'auto',
-        fontSize: 12
+        overflow: 'auto'
     }
 })
 
@@ -21,12 +20,7 @@ const TreeView: React.FC<Props> = ({ data, children, ...props }) => {
     return (
         <div className={root} onClick={(e) => props.onClick(null, e)}>
             {data.map((node, key) => (
-                <TreeNode
-                    key={key}
-                    node={node}
-                    {...{ name: node.name, children: node.children }}
-                    {...props}
-                />
+                <TreeNode key={key} node={node} {...props} />
             ))}
         </div>
     )

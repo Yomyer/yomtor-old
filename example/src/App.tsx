@@ -42,10 +42,15 @@ const useStyles = makeStyles((theme) => ({
         maxWidth: maxWidth,
         flexBasis: maxWidth,
         minWidth: maxWidth,
-        background: theme.palette.background.paper,
+        background: theme.palette.background.default,
         borderWidth: '1px',
         borderColor: theme.palette.divider,
-        borderRightStyle: 'solid'
+        borderLeftStyle: 'solid'
+    },
+    toolbar: {
+        borderWidth: '1px',
+        borderColor: theme.palette.divider,
+        borderBottomStyle: 'solid'
     },
     main: {
         height: '100%'
@@ -101,7 +106,7 @@ const App = () => {
     const [socket, setSocket] = useState<Socket>(null)
     const [players, setPlayers] = useState<Player[]>([])
     */
-    const { start, end, main, canvasPanelCanvasPanel } = useStyles()
+    const { start, end, main, canvasPanelCanvasPanel, toolbar } = useStyles()
 
     const settings = {
         colors: [new Color('#000'), new Color('#000')]
@@ -169,7 +174,7 @@ const App = () => {
                     item
                     xs={12}
                 >
-                    <Grid item>
+                    <Grid item className={toolbar}>
                         <Toolbar>
                             <RectangleTool>
                                 <button>Rect</button>

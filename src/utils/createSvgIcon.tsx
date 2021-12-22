@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { memo, forwardRef } from 'react'
 import SvgIcon from '../components/icons/SvgIcon'
 
 export type IconProps = {
     rotate?: number
     viewport?: string
+    hidden?: boolean
 }
 
 export const createSvgIcon = (path: JSX.Element, displayName: string) => {
@@ -19,5 +20,5 @@ export const createSvgIcon = (path: JSX.Element, displayName: string) => {
         Component.displayName = `${displayName}Icon`
     }
 
-    return React.memo(React.forwardRef<unknown, IconProps>(Component))
+    return memo(forwardRef<unknown, IconProps>(Component))
 }

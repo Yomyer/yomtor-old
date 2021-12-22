@@ -7,12 +7,11 @@ import React, {
     useState
 } from 'react'
 import EditorContext from '../EditorContext'
-import Artboard from '../icons/Artboard'
-import Group from '../icons/Group'
-import Image from '../icons/Image'
 import { TreeNodeData } from './tree/TreeNode'
 import TreeView from './tree/TreeView'
 import { createSvgIcon } from '../../utils'
+import { Visible, Group, Image, Artboard, Lock, Hide, Unlock } from '../icons'
+import { createUseStyles } from 'react-jss'
 
 const ObjectsPanel: React.FC = () => {
     const { canvas } = useContext(EditorContext)
@@ -29,12 +28,18 @@ const ObjectsPanel: React.FC = () => {
                 'object:rotated',
                 'selection:created',
                 'selection:updated',
-                'selection:cleared'
+                'selection:cleared',
+                'hightlight:created',
+                'hightlight:cleared'
             ],
             () => {
-                setData([...canvas.project.activeLayer.children])
+                update()
             }
         )
+    }, [canvas])
+
+    const update = useCallback(() => {
+        setData([...canvas.project.activeLayer.children])
     }, [canvas])
 
     const onClick = useCallback(
@@ -69,9 +74,24 @@ const ObjectsPanel: React.FC = () => {
         [canvas]
     )
 
-    const hightlight = useCallback(
+    const hightlightHandler = useCallback(
         (node: TreeNodeData<Item>, status = false) => {
             node.highlighted = status
+            canvas.fire(`hightlight:${status ? 'created' : 'cleared'}`)
+        },
+        [canvas]
+    )
+
+    const lockHandler = useCallback(
+        (node: TreeNodeData<Item>, status) => {
+            node.locked = status
+        },
+        [canvas]
+    )
+
+    const hideHandler = useCallback(
+        (node: TreeNodeData<Item>, status) => {
+            node.visible = !status
         },
         [canvas]
     )
@@ -79,6 +99,65 @@ const ObjectsPanel: React.FC = () => {
     const activeFilter = useCallback(
         (node: TreeNodeData<Item>) => {
             return node.actived
+        },
+        [canvas]
+    )
+
+    const highlightFilter = useCallback(
+        (node: TreeNodeData<Item>) => {
+            return node.highlighted
+        },
+        [canvas]
+    )
+
+    const actionFilter = useCallback(
+        (node: TreeNodeData<Item>) => {
+            const { lock, visible } = createUseStyles<
+                'lock' | 'visible',
+                { node: TreeNodeData<Item> }
+            >({
+                lock: {
+                    display: (props) =>
+                        props.node.highlighted ||
+                        !props.node.visible ||
+                        props.node.locked
+                            ? 'flex'
+                            : 'none',
+                    visibility: (props) =>
+                        props.node.highlighted || props.node.locked
+                            ? 'visible'
+                            : 'hidden'
+                },
+                visible: {
+                    display: (props) =>
+                        props.node.highlighted ||
+                        !props.node.visible ||
+                        props.node.locked
+                            ? 'flex'
+                            : 'none',
+                    visibility: (props) =>
+                        props.node.highlighted || !props.node.visible
+                            ? 'visible'
+                            : 'hidden'
+                }
+            })({ node })
+
+            return (
+                <>
+                    <span
+                        className={visible}
+                        onClick={() => hideHandler(node, node.visible)}
+                    >
+                        {node.visible ? <Visible /> : <Hide />}
+                    </span>
+                    <span
+                        className={lock}
+                        onClick={() => lockHandler(node, !node.locked)}
+                    >
+                        {node.locked ? <Lock /> : <Unlock />}
+                    </span>
+                </>
+            )
         },
         [canvas]
     )
@@ -130,10 +209,12 @@ const ObjectsPanel: React.FC = () => {
             <TreeView
                 data={data}
                 onClick={onClick}
-                onMouseEnter={(node) => hightlight(node, true)}
-                onMouseLeave={(node) => hightlight(node)}
+                onMouseEnter={(node) => hightlightHandler(node, true)}
+                onMouseLeave={(node) => hightlightHandler(node)}
                 iconFilter={iconFilter}
                 activeFilter={activeFilter}
+                highlightFilter={highlightFilter}
+                actionFilter={actionFilter}
             />
         </>
     )
