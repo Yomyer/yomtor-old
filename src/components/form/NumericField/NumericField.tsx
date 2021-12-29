@@ -1,15 +1,15 @@
 import React, { useRef, useState } from 'react'
-import ArrowIcon from '../icons/ArrowIcon'
-import Input from '../override/Input'
-import Field, { FieldProps } from '../form/Field/Field'
+import ArrowIcon from '../../icons/ArrowIcon'
+import Input from '../../override/Input'
+import Field, { FieldProps } from '../Field/Field'
 import { createUseStyles, useTheme } from 'react-jss'
 import Draggable from 'react-draggable'
-import { clearGlobalCursor, setGlobalCursor } from '../../utils/cursorUtils'
+import { clearGlobalCursor, setGlobalCursor } from '../../../utils/cursorUtils'
 import Ink from 'react-ink'
-import useLongPress from '../../uses/useLongPress'
-import { clearProps } from '../../utils'
-import { YomtorTheme } from '../../styles/createTheme'
-import Resize from '../icons/cursor/Resize'
+import useLongPress from '../../../uses/useLongPress'
+import { clearProps } from '../../../utils'
+import { YomtorTheme } from '../../../styles/createTheme'
+import Resize from '../../icons/cursor/Resize'
 
 type Props = {
     prefix?: string
