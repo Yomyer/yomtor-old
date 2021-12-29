@@ -1,4 +1,4 @@
-import { Margin } from './margin'
+import Margin from './margin'
 
 test('Create a default Margin', () => {
     expect(new Margin()).toMatchObject({

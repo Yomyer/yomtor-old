@@ -1,4 +1,4 @@
-import { Point } from './point'
+import Point from './point'
 
 test('Create a Point', () => {
     expect(new Point({ x: 10, y: 20 })).toMatchObject({ x: 10, y: 20 })

@@ -1,4 +1,4 @@
-import { Font } from './font'
+import Font from './font'
 
 test('Create a Font', () => {
     expect(

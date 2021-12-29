@@ -106,37 +106,6 @@ const clearAll = (classList: DOMTokenList, find: string) => {
         } catch (error) {}
     })
 }
-/*
-const toBase64PNG = (svg: SVGElement): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas') as HTMLCanvasElement
-        canvas.width = 64
-        canvas.height = 64
-
-        const DOMURL = self.URL || self.webkitURL
-        const ctx = canvas.getContext('2d')
-        const string = new XMLSerializer().serializeToString(svg)
-        const img = new Image()
-        const blob = new Blob([string], {
-            type: 'image/svg+xml;charset=utf-8'
-        })
-        const url = DOMURL.createObjectURL(blob)
-
-        img.onload = function () {
-            ctx.drawImage(img, 0, 0)
-            const png = canvas.toDataURL('image/png')
-
-            resolve(png)
-            DOMURL.revokeObjectURL(png)
-        }
-        img.onerror = function (error) {
-            reject(error)
-        }
-
-        img.src = url
-    })
-}
-*/
 
 const toBase64SVG = (svg: SVGElement) => {
     return `data:image/svg+xml;base64,${toBase64(

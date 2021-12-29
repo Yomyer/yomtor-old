@@ -1,6 +1,7 @@
-import { Color, Point } from '.'
+import Color from './color'
+import Point from './point'
 
-export class Player {
+export default class Player {
     id?: string | undefined
     color?: Color | undefined
     name?: string | undefined

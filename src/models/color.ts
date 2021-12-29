@@ -1,3 +1,3 @@
 import { Color as PaperColor } from '@yomyer/paper'
 
-export class Color extends PaperColor {}
+export default class Color extends PaperColor {}

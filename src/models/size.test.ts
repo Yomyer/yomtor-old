@@ -1,4 +1,4 @@
-import { Size } from './size'
+import Size from './size'
 
 test('Create a Size', () => {
     expect(new Size({ width: 200, height: 100 })).toMatchObject({

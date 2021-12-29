@@ -1,6 +1,6 @@
 import { isString, merge } from 'lodash'
 
-export class Unit {
+export default class Unit {
     name: string | undefined
     code: string | undefined
     factor?: number

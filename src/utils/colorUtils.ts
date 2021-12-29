@@ -1,4 +1,4 @@
-import { Color } from '../models'
+import Color from '../models/color'
 
 export const colorWord = (word: string): Color => {
     let hash = 0

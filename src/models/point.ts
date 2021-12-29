@@ -1,3 +1,3 @@
 import { Point as PointPaper } from '@yomyer/paper'
 
-export class Point extends PointPaper {}
+export default class Point extends PointPaper {}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { clearProps } from '../../utils'
 import Input from '../override/Input'
-import Field, { FieldProps } from './Field'
+import Field, { FieldProps } from '../form/Field/Field'
 
 type Props = FieldProps<HTMLInputElement>
 

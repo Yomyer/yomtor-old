@@ -1,4 +1,4 @@
-import { Unit } from './unit'
+import Unit from './unit'
 
 test('Create a Size', () => {
     expect(new Unit({ name: 'Pixel', code: 'px' })).toMatchObject({

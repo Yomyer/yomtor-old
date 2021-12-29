@@ -1,4 +1,4 @@
-import { Color } from './color'
+import Color from './color'
 
 test('Create a Color with HEX', () => {
     expect(new Color('#0000FFe6')).toMatchObject({

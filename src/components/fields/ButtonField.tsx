@@ -2,7 +2,7 @@ import React from 'react'
 import { createUseStyles } from 'react-jss'
 import { YomtorTheme } from '../../styles/createTheme'
 import Button from '../override/Button'
-import Field, { FieldProps } from './Field'
+import Field, { FieldProps } from '../form/Field/Field'
 
 type Props = FieldProps<HTMLButtonElement>
 

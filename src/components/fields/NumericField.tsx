@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import ArrowIcon from '../icons/ArrowIcon'
 import Input from '../override/Input'
-import Field, { FieldProps } from './Field'
+import Field, { FieldProps } from '../form/Field/Field'
 import { createUseStyles, useTheme } from 'react-jss'
 import Draggable from 'react-draggable'
 import { clearGlobalCursor, setGlobalCursor } from '../../utils/cursorUtils'

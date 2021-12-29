@@ -1,7 +1,7 @@
 import { PaperScope } from '@yomyer/paper'
 import { createContext } from 'react'
 import { YomtorTheme } from '../styles/createTheme'
-import { Settings } from '../redux/settings/settings.model'
+import Settings from '../models/settings'
 
 type EditorContextProps = {
     canvas: PaperScope | null

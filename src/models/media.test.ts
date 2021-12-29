@@ -1,4 +1,4 @@
-import { Media } from './media'
+import Media from './media'
 
 test('Create a Size', () => {
     expect(new Media({ file: 'path_to_file' })).toMatchObject({

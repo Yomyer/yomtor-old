@@ -1,4 +1,4 @@
-import { Grid } from './grid'
+import Grid from './grid'
 
 test('Create a default Grid', () => {
     expect(new Grid()).toMatchObject({ columns: 12, gap: 30 })

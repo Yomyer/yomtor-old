@@ -1,6 +1,6 @@
 import { isNumber, merge } from 'lodash'
 
-export class Grid {
+export default class Grid {
     columns?: number
     gap?: number
 

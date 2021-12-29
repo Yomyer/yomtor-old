@@ -1,6 +1,6 @@
 import { isNumber, merge } from 'lodash'
 
-export class Margin {
+export default class Margin {
     top?: number
     bottom?: number
     left?: number

@@ -23,7 +23,7 @@ export const FontStyleLabels = {
 
 export type FontStyles = keyof typeof FontStyleLabels
 
-export class Font {
+export default class Font {
     name: string | undefined
     url: string | undefined
     styles: FontStyles[] | undefined
